@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../utils/api";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 function Signup() {
 
@@ -127,9 +127,7 @@ function Signup() {
           </div>
         </div>
         {/* rts register area end */}
-      </div>
-      <ToastContainer autoClose={3000} closeButton={false} />
-    </>
+      </div>    </>
   );
 }
 

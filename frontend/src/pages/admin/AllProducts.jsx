@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import api from '../../utils/api';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const ProductTable = styled.table`
   width: 100%;
@@ -120,17 +120,14 @@ const AllProducts = () => {
               <td> ₹{product.sellingprice}  <del>{product.originalprice}</del></td>
               <td>{product.category}</td>
               <td>
-                {/* <button className="see-btn">See</button> */}
-                <button className="edit-btn">Edit</button>
+                <button className="edit-btn" onClick={() => window.location.href = `/admin/editproduct/${product._id}`}>Edit</button>
                 <button className="delete-btn" onClick={()=>handleDeleteProduct(product?._id)}>Delete</button>
               </td>
             </tr>
           )) : <tr><td colSpan={5}><h4>No product found</h4></td></tr>
           }
         </tbody>
-      </ProductTable>
-      <ToastContainer autoClose={3000} closeButton={false} />
-    </div>
+      </ProductTable>    </div>
   );
 
 };

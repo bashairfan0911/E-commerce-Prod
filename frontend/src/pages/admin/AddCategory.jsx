@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import api from '../../utils/api';
 
 function AddCategory() {
@@ -82,9 +82,7 @@ function AddCategory() {
         </div>
         <input type="text" placeholder="Description" required value={description} onChange={(e) => setDescription(e.target.value)} />
         <button className="rts-btn btn-primary" type='submit'>Save Change</button>
-      </form>
-      <ToastContainer autoClose={3000} closeButton={false} />
-    </>
+      </form>    </>
   )
 }
 

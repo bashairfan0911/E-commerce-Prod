@@ -1,11 +1,65 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../utils/api";
 import AddtoCart from "../../components/AddtoCart";
+import QuickViewModal from "../../components/QuickViewModal";
+import { toast } from "react-toastify";
 
 function ProductCard({product}) {
   
-  const user = JSON.parse(localStorage.getItem('user'))
+  const user = JSON.parse(localStorage.getItem('user'));
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [showQuickView, setShowQuickView] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    if (user && user._id) {
+      checkWishlistStatus();
+    }
+  }, [product._id]);
+
+  const checkWishlistStatus = async () => {
+    try {
+      const response = await api.post('/api/getwishlist', { userId: user._id });
+      const inWishlist = response.data.wishlist.some(item => item._id === product._id);
+      setIsInWishlist(inWishlist);
+    } catch (error) {
+      console.error('Error checking wishlist:', error);
+    }
+  };
+
+  const handleWishlistToggle = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error("Please login to add to wishlist");
+      return;
+    }
+
+    try {
+      if (isInWishlist) {
+        await api.post('/api/removefromwishlist', {
+          productId: product._id,
+          userId: user._id
+        });
+        setIsInWishlist(false);
+        toast.success("Removed from wishlist");
+      } else {
+        await api.post('/api/addtowishlist', {
+          productId: product._id,
+          userId: user._id
+        });
+        setIsInWishlist(true);
+        toast.success("Added to wishlist");
+      }
+      
+      // Trigger event to update wishlist count in header
+      window.dispatchEvent(new Event('wishlistUpdated'));
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update wishlist");
+    }
+  };
 
   return (
     <>
@@ -21,22 +75,67 @@ function ProductCard({product}) {
                 </span>
                 <i className="fa-solid fa-bookmark" />
               </div>
-              <img src={product?.images[0]?.url} alt="grocery" />
+              <div 
+                style={{ position: 'relative', overflow: 'hidden' }}
+                onMouseEnter={() => product?.images?.length > 1 && setCurrentImageIndex(1)}
+                onMouseLeave={() => setCurrentImageIndex(0)}
+              >
+                <img 
+                  src={product?.images[currentImageIndex]?.url} 
+                  alt={product?.title}
+                  style={{ 
+                    width: '100%', 
+                    transition: 'opacity 0.3s ease-in-out',
+                    opacity: 1
+                  }}
+                />
+                {product?.images?.length > 1 && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '10px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    display: 'flex',
+                    gap: '5px',
+                    zIndex: 10
+                  }}>
+                    {product.images.map((_, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: currentImageIndex === index ? '#629D23' : 'rgba(255,255,255,0.5)',
+                          cursor: 'pointer'
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentImageIndex(index);
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </Link>
             <div className="action-share-option">
               <div
                 className="single-action openuptip message-show-action"
                 data-flow="up"
-                title="Add To Wishlist"
+                title={isInWishlist ? "Remove from Wishlist" : "Add To Wishlist"}
+                onClick={(e) => handleWishlistToggle(e)}
+                style={{ cursor: 'pointer' }}
               >
-                <i className="fa-light fa-heart" />
+                <i className={isInWishlist ? "fa-solid fa-heart" : "fa-light fa-heart"} 
+                   style={{ color: isInWishlist ? '#ff0000' : '' }} />
               </div>
               <div
                 className="single-action openuptip"
                 data-flow="up"
                 title="Compare"
-                data-bs-toggle="modal"
-                data-bs-target="#exampleModal"
+                onClick={() => toast.info("Compare feature coming soon!")}
+                style={{ cursor: 'pointer' }}
               >
                 <i className="fa-solid fa-arrows-retweet" />
               </div>
@@ -44,6 +143,8 @@ function ProductCard({product}) {
                 className="single-action openuptip cta-quickview product-details-popup-btn"
                 data-flow="up"
                 title="Quick View"
+                onClick={() => setShowQuickView(true)}
+                style={{ cursor: 'pointer' }}
               >
                 <i className="fa-regular fa-eye" />
               </div>
@@ -87,6 +188,12 @@ function ProductCard({product}) {
           </div>
         </div>
       </div>
+      
+      <QuickViewModal 
+        product={product}
+        isOpen={showQuickView}
+        onClose={() => setShowQuickView(false)}
+      />
     </>
   );
 }

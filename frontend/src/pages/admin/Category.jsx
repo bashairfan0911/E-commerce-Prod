@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import api from '../../utils/api';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const ProductTable = styled.table`
   width: 100%;
@@ -126,9 +126,7 @@ const Category = () => {
             )) : <tr><td colSpan={4}><h4>No category found</h4></td></tr>
           }
         </tbody>
-      </ProductTable>
-      <ToastContainer autoClose={3000} closeButton={false} />
-    </div>
+      </ProductTable>    </div>
   );
 };
 

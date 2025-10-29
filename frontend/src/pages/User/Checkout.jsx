@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import api from '../../utils/api'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import { useParams } from 'react-router-dom'
 
 function Checkout() {
@@ -54,7 +54,10 @@ function Checkout() {
 
     const totalPrice = () => {
         return orders.reduce((acc, order) => {
-            return acc + (order.productId.sellingprice * order.quantity);
+            if (order.productId && order.productId.sellingprice) {
+                return acc + (order.productId.sellingprice * order.quantity);
+            }
+            return acc;
         }, 0);
     }
     
@@ -107,7 +110,17 @@ function Checkout() {
     }, [firstname, lastname, email, country, address, town, state, zipcode, phone, paymentMethod, termsAccepted]);
 
     const handlePayment = async () => {
+        
+        if (paymentMethod === 'cash') {
+            // Cash on Delivery - No payment gateway needed
+            toast.success("Order placed successfully! You will pay on delivery.");
+            setTimeout(() => {
+                window.location.href = '/account/order';
+            }, 2000);
+            return;
+        }
 
+        // Online payment with Razorpay
         const orderData = {
             amount: totalPrice(),
             currency: 'INR'
@@ -115,21 +128,35 @@ function Checkout() {
 
         try {
             const response = await api.post('/api/startpayment', orderData)
+            
+            // Check if Razorpay is configured
+            if (response.status === 503) {
+                toast.error("Online payment is currently unavailable. Please use Cash on Delivery.");
+                return;
+            }
+
             const { amount, id: order_id, currency } = response.data.order;
             console.log(response)
 
-            console.log(amount)
+            // Check if Razorpay script is loaded
+            if (!window.Razorpay) {
+                toast.error("Payment gateway not loaded. Please refresh the page or use Cash on Delivery.");
+                return;
+            }
+
             const options = {
                 key: 'rzp_test_O6Bn6Gx3D2bGKN',
                 amount: amount,
                 currency: currency,
-                name: 'NEW-cart',
-                description: 'This is description',
+                name: 'EkoMart',
+                description: 'Order Payment',
                 order_id: order_id,
                 handler: function (response) {
-                    alert("Payment successful");
+                    toast.success("Payment successful!");
                     console.log(response);
-                    // You can make another API call here to store payment details
+                    setTimeout(() => {
+                        window.location.href = '/account/order';
+                    }, 2000);
                 },
                 prefill: {
                     name: firstname + " " + lastname,
@@ -137,16 +164,20 @@ function Checkout() {
                     contact: phone,
                 },
                 theme: {
-                    color: "#3399cc"
+                    color: "#629D23"
                 }
             }
 
             const rzp1 = new window.Razorpay(options)
             rzp1.open()
 
-
         } catch (error) {
             console.log("Error creating order:", error)
+            if (error.response?.status === 503) {
+                toast.error("Online payment is currently unavailable. Please use Cash on Delivery.");
+            } else {
+                toast.error("Payment failed. Please try again or use Cash on Delivery.");
+            }
         }
     }
 
@@ -257,21 +288,27 @@ function Checkout() {
                                 </div>
 
                                 {
-
-                                    orders.map((order) => (
+                                    orders.filter(order => order.productId).map((order) => (
                                         <div className="single-shop-list" key={order._id}>
                                             <div className="left-area">
                                                 <a href="#" className="thumbnail">
-                                                    <img src={order.productId.images[0].url} />
+                                                    <img src={order.productId?.images?.[0]?.url || 'https://via.placeholder.com/100'} alt={order.productId?.title || 'Product'} />
                                                 </a>
                                                 <a href="#" className="title">
-                                                {order.productId.title}
+                                                {order.productId?.title || 'Product Unavailable'}
                                                 </a>
                                             </div>
-                                            <span className="price">₹ {order.productId.sellingprice * order.quantity}</span>
+                                            <span className="price">₹ {(order.productId?.sellingprice || 0) * order.quantity}</span>
                                         </div>
                                     ))
                                 }
+                                {orders.filter(order => !order.productId).length > 0 && (
+                                    <div style={{ padding: '10px', backgroundColor: '#fff3cd', borderRadius: '4px', margin: '10px 0' }}>
+                                        <p style={{ margin: 0, fontSize: '14px', color: '#856404' }}>
+                                            <i className="fa fa-exclamation-triangle"></i> Some products in this order are no longer available
+                                        </p>
+                                    </div>
+                                )}
                                 <div>
                                     {/* <div className="single-shop-list">
                                         <div className="left-area">
@@ -342,7 +379,6 @@ function Checkout() {
                 </div>
             </div>
             <Footer />
-            <ToastContainer autoClose={3000} closeButton={false} />
         </>
     )
 }

@@ -3,7 +3,7 @@ import CartCard from "./CartCard";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import api from "../../utils/api";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 
 function Cart() {
@@ -42,6 +42,8 @@ function Cart() {
       userId: user._id,
       items: cart.map((item)=> ({productId: item.product._id, quantity: item.quantity})),
       totalAmount: total,
+      shippingAddress: user.address || {},
+      paymentMethod: 'cash'
     }
     try {
       const response = await api.post('/api/createorder', orderData)
@@ -189,7 +191,6 @@ function Cart() {
       </div>
       {/* rts cart area end */}
       <Footer />
-      <ToastContainer autoClose={3000} closeButton={false} />
     </>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import api from '../utils/api';
 import { Link } from 'react-router-dom';
 
@@ -55,7 +55,6 @@ function AddtoCart({productId,userId}) {
                     </div>
                 </Link>
             </div>
-            <ToastContainer autoClose={1000} closeButton={false} />
         </>
     )
 }

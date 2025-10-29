@@ -1,17 +1,62 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import api from "../utils/api";
 import { Link } from "react-router-dom";
 import AddtoCart from "./AddtoCart";
+import QuickViewModal from "./QuickViewModal";
+import { toast } from "react-toastify";
 
 function FeaturedCard({product}) {
-// console.log(product)
-// if(product){
-//   const {_id,brandname,category,description,originalprice,sellingprice,title,weight,images} = product
-//   // console.log(_id)
-// }
-  
-  // const user = JSON.parse(localStorage.getItem('user'))
   const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+  const [showQuickView, setShowQuickView] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+
+  useEffect(() => {
+    if (user && user._id) {
+      checkWishlistStatus();
+    }
+  }, [product._id]);
+
+  const checkWishlistStatus = async () => {
+    try {
+      const response = await api.post('/api/getwishlist', { userId: user._id });
+      const inWishlist = response.data.wishlist.some(item => item._id === product._id);
+      setIsInWishlist(inWishlist);
+    } catch (error) {
+      console.error('Error checking wishlist:', error);
+    }
+  };
+
+  const handleWishlistToggle = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error("Please login to add to wishlist");
+      return;
+    }
+
+    try {
+      if (isInWishlist) {
+        await api.post('/api/removefromwishlist', {
+          productId: product._id,
+          userId: user._id
+        });
+        setIsInWishlist(false);
+        toast.success("Removed from wishlist");
+      } else {
+        await api.post('/api/addtowishlist', {
+          productId: product._id,
+          userId: user._id
+        });
+        setIsInWishlist(true);
+        toast.success("Added to wishlist");
+      }
+      
+      window.dispatchEvent(new Event('wishlistUpdated'));
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update wishlist");
+    }
+  };
 
 
 
@@ -34,16 +79,19 @@ function FeaturedCard({product}) {
               <div
                 className="single-action openuptip message-show-action"
                 data-flow="up"
-                title="Add To Wishlist"
+                title={isInWishlist ? "Remove from Wishlist" : "Add To Wishlist"}
+                onClick={(e) => handleWishlistToggle(e)}
+                style={{ cursor: 'pointer' }}
               >
-                <i className="fa-light fa-heart" />
+                <i className={isInWishlist ? "fa-solid fa-heart" : "fa-light fa-heart"} 
+                   style={{ color: isInWishlist ? '#ff0000' : '' }} />
               </div>
               <div
                 className="single-action openuptip"
                 data-flow="up"
                 title="Compare"
-                data-bs-toggle="modal"
-                data-bs-target="#exampleModal"
+                onClick={() => toast.info("Compare feature coming soon!")}
+                style={{ cursor: 'pointer' }}
               >
                 <i className="fa-solid fa-arrows-retweet" />
               </div>
@@ -51,6 +99,8 @@ function FeaturedCard({product}) {
                 className="single-action openuptip cta-quickview product-details-popup-btn"
                 data-flow="up"
                 title="Quick View"
+                onClick={() => setShowQuickView(true)}
+                style={{ cursor: 'pointer' }}
               >
                 <i className="fa-regular fa-eye" />
               </div>
@@ -74,6 +124,12 @@ function FeaturedCard({product}) {
           </div>
         </div>
       </div>
+      
+      <QuickViewModal 
+        product={product}
+        isOpen={showQuickView}
+        onClose={() => setShowQuickView(false)}
+      />
     </>
   );
 }

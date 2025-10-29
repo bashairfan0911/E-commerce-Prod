@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../utils/api";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 function CartCard({ cart, updateTotal, setCart }) {
 

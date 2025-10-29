@@ -3,7 +3,7 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import { Link, useParams } from "react-router-dom";
 import api from "../../utils/api";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 function SingleProduct() {
 
@@ -13,6 +13,7 @@ function SingleProduct() {
   const [currentImage, setCurrentImage] = useState("")
   const [activeIndex, setActiveIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [isInWishlist, setIsInWishlist] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user'))
 
@@ -46,6 +47,47 @@ function SingleProduct() {
     setActiveIndex(index)
   }
 
+  const checkWishlistStatus = async () => {
+    if (!user || !user._id) return;
+    
+    try {
+      const response = await api.post('/api/getwishlist', { userId: user._id });
+      const inWishlist = response.data.wishlist.some(item => item._id === id);
+      setIsInWishlist(inWishlist);
+    } catch (error) {
+      console.error('Error checking wishlist:', error);
+    }
+  };
+
+  const handleWishlistToggle = async () => {
+    if (!user) {
+      toast.error("Please login to add to wishlist");
+      return;
+    }
+
+    try {
+      if (isInWishlist) {
+        await api.post('/api/removefromwishlist', {
+          productId: id,
+          userId: user._id
+        });
+        setIsInWishlist(false);
+        toast.success("Removed from wishlist");
+      } else {
+        await api.post('/api/addtowishlist', {
+          productId: id,
+          userId: user._id
+        });
+        setIsInWishlist(true);
+        toast.success("Added to wishlist");
+      }
+      
+      window.dispatchEvent(new Event('wishlistUpdated'));
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update wishlist");
+    }
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
     const fetchSingleProduct = async () => {
@@ -59,7 +101,8 @@ function SingleProduct() {
       }
     }
     fetchSingleProduct()
-  }, [])
+    checkWishlistStatus()
+  }, [id])
 
   // useEffect()
 
@@ -242,11 +285,16 @@ function SingleProduct() {
                               </span> */}
                             </div>
                             <div className="share-option-shop-details">
-                              <div className="single-share-option">
+                              <div 
+                                className="single-share-option" 
+                                onClick={handleWishlistToggle}
+                                style={{ cursor: 'pointer' }}
+                              >
                                 <div className="icon">
-                                  <i className="fa-regular fa-heart" />
+                                  <i className={isInWishlist ? "fa-solid fa-heart" : "fa-regular fa-heart"} 
+                                     style={{ color: isInWishlist ? '#ff0000' : '' }} />
                                 </div>
-                                <span>Add To Wishlist</span>
+                                <span>{isInWishlist ? "Remove from Wishlist" : "Add To Wishlist"}</span>
                               </div>
                               <div className="single-share-option">
                                 <div className="icon">
@@ -315,7 +363,6 @@ function SingleProduct() {
       </div>
 
       <Footer />
-      <ToastContainer autoClose={3000} closeButton={false} />
     </>
   );
 }

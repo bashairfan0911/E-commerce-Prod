@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../../utils/api';
 
@@ -44,47 +44,70 @@ function AddProduct() {
     //   console.log(key, value);
     // }
 
-    if (!title || !images || !description || !selectedCategory || selectedCategory == "" || !brandName || !weight || !originalprice || !discount) {
-      toast.error("All fileds are required")
-    } else {
-      if (images.length > 5) {
-        toast.error("Only 5 images upload")
-      } else {
-        const toastId = toast.loading("Please wait ...")
-        try {
-          const response = await api.post('/api/addproduct', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            }
-          })
-          toast.update(toastId, {
-            render: response.data.message,
-            type: "success",
-            isLoading: false,
-            autoClose: 3000
-          })
-          // console.log(response.data.message)
-          setTitle("")
-          setDescription("")
-          setImages([])
-          setselectedCategory("")
-          setBrandName("")
-          setWeight("")
-          setOriginalPrice("")
-          setSellingPrice("")
-          setDiscount("")
-          setSelectedType("")
-          fileInputRef.current.value = null
-        } catch (error) {
-          toast.update(toastId, {
-            render: error.response.data.message,
-            type: "error",
-            isLoading: false,
-            autoClose: 3000
-          })
-          console.error(`Error in uploading product : ${error}`)
+    // Validation
+    if (!title || !description || !selectedCategory || selectedCategory === "" || !brandName || !weight || !originalprice || !discount) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    if (images.length === 0) {
+      toast.error("Please select at least one image");
+      return;
+    }
+
+    if (images.length > 5) {
+      toast.error("Maximum 5 images allowed");
+      return;
+    }
+
+    if (!selectedType || selectedType === "") {
+      toast.error("Please select a product type");
+      return;
+    }
+
+    console.log('Submitting product with', images.length, 'images');
+    const toastId = toast.loading("Uploading product...");
+    
+    try {
+      const response = await api.post('/api/addproduct', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
         }
+      });
+      
+      console.log('Product added successfully:', response.data);
+      
+      toast.update(toastId, {
+        render: response.data.message || "Product added successfully",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000
+      });
+      
+      // Reset form
+      setTitle("");
+      setDescription("");
+      setImages([]);
+      setselectedCategory("");
+      setBrandName("");
+      setWeight("");
+      setOriginalPrice("");
+      setSellingPrice("");
+      setDiscount("");
+      setSelectedType("");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
       }
+    } catch (error) {
+      console.error('Error uploading product:', error);
+      console.error('Error response:', error.response?.data);
+      
+      toast.update(toastId, {
+        render: error.response?.data?.message || "Error adding product",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000
+      });
     }
   }
 
@@ -120,9 +143,13 @@ function AddProduct() {
           </div>
         </div>
         <div style={{ margin: '20px 0' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
+            Product Images (Max 5 images)
+          </label>
           <input
             type="file"
             multiple
+            accept="image/*"
             style={{
               padding: '10px',
               border: '1px solid #ccc',
@@ -132,8 +159,22 @@ function AddProduct() {
               backgroundColor: '#f9f9f9',
             }}
             ref={fileInputRef}
-            onChange={(e) => setImages([...e.target.files])}
+            onChange={(e) => {
+              const files = [...e.target.files];
+              console.log('Files selected:', files.length);
+              setImages(files);
+            }}
           />
+          {images.length > 0 && (
+            <p style={{ marginTop: '8px', color: '#629D23', fontSize: '14px' }}>
+              {images.length} image(s) selected
+            </p>
+          )}
+          {images.length > 5 && (
+            <p style={{ marginTop: '8px', color: '#ff4444', fontSize: '14px' }}>
+              ⚠️ Maximum 5 images allowed. Please remove {images.length - 5} image(s).
+            </p>
+          )}
         </div>
         <select
           style={{
@@ -203,9 +244,7 @@ function AddProduct() {
           </div>
         </div>
         <button className="rts-btn btn-primary" type='submit'>Save Change</button>
-      </form>
-      <ToastContainer autoClose={3000} closeButton={false} />
-    </>
+      </form>    </>
   )
 }
 

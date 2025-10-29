@@ -11,20 +11,27 @@ const __dirname = path.dirname(__filename);
 export const addCategory = async (req, res) => {
   try {
     const { catname, stocks, description } = req.body;
+    
+    console.log('Category data received:', { catname, stocks, description });
+    console.log('File received:', req.file);
+    
     if (!req.file) {
       return res.status(400).json({ message: "No image file uploaded" });
     }
 
     // image upload on cloudinary
+    console.log('Uploading to Cloudinary...');
     const imageUploaded = await cloudinary.uploader.upload(req.file.path, {
       folder: "categories",
     });
+    console.log('Cloudinary upload successful:', imageUploaded.secure_url);
+    
     const image = {
       url: imageUploaded.secure_url,
       public_id: imageUploaded.public_id,
     };
 
-    // sava data on database
+    // save data on database
     const newCategory = new categoryModel({
       catname,
       image,
@@ -32,6 +39,7 @@ export const addCategory = async (req, res) => {
       description,
     });
     await newCategory.save();
+    console.log('Category saved to database');
 
     // delete image from local server
     fs.unlink(
@@ -46,7 +54,8 @@ export const addCategory = async (req, res) => {
     );
     res.status(200).json({ message: "New category added", newCategory });
   } catch (error) {
-    res.status(500).json({ message: "Category not added", error });
+    console.error("Error adding category:", error);
+    res.status(500).json({ message: "Category not added", error: error.message });
   }
 };
 

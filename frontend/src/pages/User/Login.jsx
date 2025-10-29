@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import api from "../../utils/api";
 
 function Login() {
@@ -118,9 +118,7 @@ function Login() {
           </div>
         </div>
         {/* rts register area end */}
-      </div>
-      <ToastContainer autoClose={3000} closeButton={false} />
-    </>
+      </div>    </>
   );
 }
 

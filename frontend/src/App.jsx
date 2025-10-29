@@ -1,8 +1,9 @@
 import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-import Home from './pages/Home/Home'
 import { Route, Routes } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
+import Home from './pages/Home/Home'
 import Error404 from './pages/Error404'
 import Wishlist from './pages/Wishlist/Wishlist'
 import Cart from './pages/Cart/Cart'
@@ -21,8 +22,10 @@ import Layout from './pages/admin/Layout'
 import Dashboard from './pages/admin/Dashboard'
 import AllProducts from './pages/admin/AllProducts'
 import AddProduct from './pages/admin/AddProduct'
+import EditProduct from './pages/admin/EditProduct'
 import Category from './pages/admin/Category'
 import AddCategory from './pages/admin/AddCategory'
+import Orders from './pages/admin/Orders'
 import AdminLogin from './pages/admin/AdminLogin'
 import ProtectedRoute from './components/ProtectedRoute'
 import Checkout from './pages/User/Checkout'
@@ -32,6 +35,18 @@ function App() {
 
   return (
     <>
+     <ToastContainer 
+       position="top-right"
+       autoClose={3000}
+       hideProgressBar={false}
+       newestOnTop
+       closeOnClick
+       rtl={false}
+       pauseOnFocusLoss
+       draggable
+       pauseOnHover
+       theme="light"
+     />
      <Routes>
       <Route path='/' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
       <Route path='/cart' element={<ProtectedRoute><Cart/></ProtectedRoute>}/>
@@ -59,8 +74,10 @@ function App() {
         <Route index element={<Dashboard/>}/>
         <Route path='allproducts' element={<AllProducts/>}/>
         <Route path='addproduct' element={<AddProduct/>}/>
+        <Route path='editproduct/:id' element={<EditProduct/>}/>
         <Route path='allcategory' element={<Category/>}/>
         <Route path='addcategory' element={<AddCategory/>}/>
+        <Route path='orders' element={<Orders/>}/>
       </Route>
 
 

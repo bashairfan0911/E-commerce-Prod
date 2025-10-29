@@ -36,7 +36,7 @@ export const loginUser = async (req, res) => {
     } else {
       const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) {
-        const token = jwt.sign({ id: user._id }, process.env.SECRET, {
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
           expiresIn: "24h",
         });
         res
@@ -55,8 +55,8 @@ export const userDetails = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
     // console.log(req.headers.authorization)
-    // console.log(process.env.SECRET)
-    const decoded = jwt.verify(token, process.env.SECRET);
+    // console.log(process.env.JWT_SECRET_KEY)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log('decoded',decoded)
     const userId = decoded.id;
     // console.log('userid : ' ,userId)
@@ -74,26 +74,48 @@ export const userDetails = async (req, res) => {
 };
 
 export const userUpdate = async (req, res) => {
-  const { firstname, lastname, username, email, currentPassword } = req.body;
+  const { firstname, lastname, username, email, currentPassword, newPassword } = req.body;
+
+  console.log('Update request:', { email, hasNewPassword: !!newPassword });
 
   try {
-    // const password = await bcrypt.compare(password, user.password);
-
     const user = await userModel.findOne({ email });
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Verify current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
 
-    if (user && isMatch) {
-      const updatedUser = await userModel.findOneAndUpdate(
-        { email },
-        { firstname, lastname },
-        { new: true }
-      );
-      res.status(200).json({ message: "user updated" });
-    } else {
-      res.status(500).json({ message: "password is wrong" });
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
     }
+
+    // Update basic info
+    user.firstname = firstname || user.firstname;
+    user.lastname = lastname || user.lastname;
+
+    // Update password if provided
+    if (newPassword) {
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "New password must be at least 6 characters" });
+      }
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedPassword;
+      console.log('Password updated for user:', email);
+    }
+
+    await user.save();
+    
+    const message = newPassword 
+      ? "Account and password updated successfully" 
+      : "Account updated successfully";
+    
+    res.status(200).json({ message, user: { ...user.toObject(), password: undefined } });
   } catch (error) {
-    res.status(500).json({ message: "user not updated" });
+    console.error('Error updating user:', error);
+    res.status(500).json({ message: "Failed to update account" });
   }
 };
 
@@ -125,3 +147,23 @@ export const userAddress = async(req,res) => {
 
 
 }
+
+
+// Get all users count for admin dashboard
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await userModel.find().select('-password');
+    
+    res.status(200).json({
+      message: "All users fetched successfully",
+      users: users,
+      count: users.length
+    });
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    res.status(500).json({
+      message: "Error fetching users",
+      error: error.message
+    });
+  }
+};

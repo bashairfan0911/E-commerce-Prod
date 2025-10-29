@@ -8,35 +8,88 @@ import { Link, useParams } from "react-router-dom";
 function Products() {
 
   const { catname } = useParams();
+  const [searchParams] = useState(new URLSearchParams(window.location.search));
+  const searchQuery = searchParams.get('search');
 
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [category, setCategory] = useState([])
+  const [category, setCategory] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/api/allproducts')
-        const response2 = await api.get('/api/allcategory')
-        setProducts(response.data.products)
-        setCategory(response2.data.categories)
+        const response = await api.get('/api/allproducts');
+        const response2 = await api.get('/api/allcategory');
+        setProducts(response.data.products);
+        setCategory(response2.data.categories);
+        setLoading(false);
       } catch (error) {
-        console.log(error)
+        console.log(error);
+        setLoading(false);
       }
-    }
-    fetchProducts()
-  }, [])
+    };
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
-    if (catname) {
-      const filterData = products.filter((product) => product.category == catname)
-      setFilteredProducts(filterData)
-    } else {
-      setFilteredProducts(products)
+    let filtered = [...products];
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((product) => 
+        product.title.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query) ||
+        product.category.toLowerCase().includes(query) ||
+        product.brandname.toLowerCase().includes(query)
+      );
     }
-  }, [catname, products])
+
+    // Filter by URL category parameter
+    if (catname) {
+      filtered = filtered.filter((product) => product.category === catname);
+    }
+
+    // Filter by selected categories from sidebar
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter((product) => 
+        selectedCategories.includes(product.category)
+      );
+    }
+
+    // Filter by price range
+    filtered = filtered.filter((product) => 
+      product.sellingprice >= priceRange.min && 
+      product.sellingprice <= priceRange.max
+    );
+
+    setFilteredProducts(filtered);
+  }, [catname, products, selectedCategories, priceRange, searchQuery]);
+
+  const handleCategoryFilter = (categoryName) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(categoryName)) {
+        return prev.filter(cat => cat !== categoryName);
+      } else {
+        return [...prev, categoryName];
+      }
+    });
+  };
+
+  const handlePriceFilter = (e) => {
+    e.preventDefault();
+    const min = parseInt(e.target.min.value) || 0;
+    const max = parseInt(e.target.max.value) || 1000;
+    setPriceRange({ min, max });
+  };
+
+  const resetFilters = () => {
+    setSelectedCategories([]);
+    setPriceRange({ min: 0, max: 1000 });
+  };
 
   return (
     <>
@@ -52,7 +105,7 @@ function Products() {
                   <Link to={'/'}>Home</Link>
                   <i className="fa-regular fa-chevron-right" />
                   <a className="current" >
-                    {catname == undefined ? "All products" : catname}
+                    {searchQuery ? `Search: "${searchQuery}"` : (catname == undefined ? "All products" : catname)}
                   </a>
                 </div>
               </div>
@@ -74,21 +127,30 @@ function Products() {
                   <div className="single-filter-box">
                     <h5 className="title">Widget Price Filter</h5>
                     <div className="filterbox-body">
-                      <form action="#" className="price-input-area">
+                      <form onSubmit={handlePriceFilter} className="price-input-area">
                         <div className="half-input-wrapper">
                           <div className="single">
                             <label htmlFor="min">Min price</label>
-                            <input id="min" type="text" defaultValue={0} />
+                            <input 
+                              id="min" 
+                              name="min"
+                              type="number" 
+                              defaultValue={0} 
+                            />
                           </div>
                           <div className="single">
                             <label htmlFor="max">Max price</label>
-                            <input id="max" type="text" defaultValue={150} />
+                            <input 
+                              id="max" 
+                              name="max"
+                              type="number" 
+                              defaultValue={1000} 
+                            />
                           </div>
                         </div>
-                        <input type="range" className="range" />
                         <div className="filter-value-min-max">
-                          <span>Price: $10 — $90</span>
-                          <button className="rts-btn btn-primary">
+                          <span>Price: ₹{priceRange.min} — ₹{priceRange.max}</span>
+                          <button type="submit" className="rts-btn btn-primary">
                             Filter
                           </button>
                         </div>
@@ -102,8 +164,13 @@ function Products() {
                         {
                           category.map((cat, index) => (
                             <div className="single-category" key={index}>
-                              <input id="cat1" type="checkbox" />
-                              <label htmlFor="cat1">{cat?.catname}</label>
+                              <input 
+                                id={`cat-${index}`} 
+                                type="checkbox"
+                                checked={selectedCategories.includes(cat.catname)}
+                                onChange={() => handleCategoryFilter(cat.catname)}
+                              />
+                              <label htmlFor={`cat-${index}`}>{cat?.catname}</label>
                             </div>
                           ))
                         }
@@ -334,8 +401,7 @@ function Products() {
                       </div>
                     </div>
                     <div className="button-area">
-                      <button className="rts-btn">Filter</button>
-                      <button className="rts-btn">Reset Filter</button>
+                      <button className="rts-btn" onClick={resetFilters}>Reset Filter</button>
                     </div>
                   </div>
                 </div>

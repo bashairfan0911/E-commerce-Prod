@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function WeekendSection() {
   return (
@@ -10,18 +11,18 @@ function WeekendSection() {
             <div className="col-lg-3 col-md-6 col-sm-12 col-12">
               <div className="single-feature-card bg_image one">
                 <div className="content-area">
-                  <a
-                    
+                  <Link
+                    to="/products/Snacks & Beverages"
                     className="rts-btn btn-primary"
                   >
                     Weekend Discount
-                  </a>
+                  </Link>
                   <h3 className="title">
                     Drink Fresh Corn Juice <br />
                     <span>Good Taste</span>
                   </h3>
-                  <a
-                    
+                  <Link
+                    to="/products/Snacks & Beverages"
                     className="shop-now-goshop-btn"
                   >
                     <span className="text">Shop Now</span>
@@ -31,25 +32,25 @@ function WeekendSection() {
                     <div className="plus-icon">
                       <i className="fa-sharp fa-regular fa-plus" />
                     </div>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
             <div className="col-lg-3 col-md-6 col-sm-12 col-12">
               <div className="single-feature-card bg_image two">
                 <div className="content-area">
-                  <a
-                    
+                  <Link
+                    to="/products/Snacks & Beverages"
                     className="rts-btn btn-primary"
                   >
                     Weekend Discount
-                  </a>
+                  </Link>
                   <h3 className="title">
                     Organic Lemon Flavored
                     <span>Banana Chips</span>
                   </h3>
-                  <a
-                    
+                  <Link
+                    to="/products/Snacks & Beverages"
                     className="shop-now-goshop-btn"
                   >
                     <span className="text">Shop Now</span>
@@ -59,25 +60,25 @@ function WeekendSection() {
                     <div className="plus-icon">
                       <i className="fa-sharp fa-regular fa-plus" />
                     </div>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
             <div className="col-lg-3 col-md-6 col-sm-12 col-12">
               <div className="single-feature-card bg_image three">
                 <div className="content-area">
-                  <a
-                    
+                  <Link
+                    to="/products/Snacks & Beverages"
                     className="rts-btn btn-primary"
                   >
                     Weekend Discount
-                  </a>
+                  </Link>
                   <h3 className="title">
                     Nozes Pecanera Brasil
                     <span>Chocolate Snacks</span>
                   </h3>
-                  <a
-                    
+                  <Link
+                    to="/products/Snacks & Beverages"
                     className="shop-now-goshop-btn"
                   >
                     <span className="text">Shop Now</span>
@@ -87,25 +88,25 @@ function WeekendSection() {
                     <div className="plus-icon">
                       <i className="fa-sharp fa-regular fa-plus" />
                     </div>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
             <div className="col-lg-3 col-md-6 col-sm-12 col-12">
               <div className="single-feature-card bg_image four">
                 <div className="content-area">
-                  <a
-                    
+                  <Link
+                    to="/products/Snacks & Beverages"
                     className="rts-btn btn-primary"
                   >
                     Weekend Discount
-                  </a>
+                  </Link>
                   <h3 className="title">
                     Strawberry Water Drinks
                     <span>Flavors Awesome</span>
                   </h3>
-                  <a
-                    
+                  <Link
+                    to="/products/Snacks & Beverages"
                     className="shop-now-goshop-btn"
                   >
                     <span className="text">Shop Now</span>
@@ -115,7 +116,7 @@ function WeekendSection() {
                     <div className="plus-icon">
                       <i className="fa-sharp fa-regular fa-plus" />
                     </div>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

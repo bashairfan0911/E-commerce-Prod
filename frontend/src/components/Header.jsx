@@ -1,15 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import { toast } from "react-toastify";
 
 function Header() {
+  const navigate = useNavigate();
 
   const [categories, setCategories] = useState([]);
   const [cart, setCart] = useState([]);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const token = localStorage.getItem('token');
 
   const user = JSON.parse(localStorage.getItem('user'))
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery('');
+    }
+  };
 
   useEffect(() => {
     const fetchedCategory = async () => {
@@ -21,6 +32,32 @@ function Header() {
       }
     }
     fetchedCategory()
+  }, [])
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!user || !user._id) return;
+      
+      try {
+        const response = await api.post('/api/getwishlist', { userId: user._id });
+        setWishlistCount(response.data.wishlist.length);
+      } catch (error) {
+        console.log('Error fetching wishlist count:', error);
+      }
+    };
+    
+    fetchWishlist();
+
+    // Listen for wishlist updates
+    const handleWishlistUpdate = () => {
+      fetchWishlist();
+    };
+
+    window.addEventListener('wishlistUpdated', handleWishlistUpdate);
+    
+    return () => {
+      window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
+    };
   }, [])
 
   useEffect(() => {
@@ -191,14 +228,16 @@ function Header() {
                         </li> */}
                       </ul>
                     </div>
-                    <form action="#" className="search-header">
+                    <form onSubmit={handleSearch} className="search-header">
                       <input
                         type="text"
                         placeholder="Search for products, categories or brands"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         required
                       />
-                      <a
-                        href="#"
+                      <button
+                        type="submit"
                         className="rts-btn btn-primary radious-sm with-icon"
                       >
                         <div className="btn-text">Search</div>
@@ -208,7 +247,7 @@ function Header() {
                         <div className="arrow-icon">
                           <i className="fa-light fa-magnifying-glass" />
                         </div>
-                      </a>
+                      </button>
                     </form>
                   </div>
                   <div className="actions-area">
@@ -253,7 +292,7 @@ function Header() {
                         >
                           <i className="fa-regular fa-heart" />
                           <span className="text">Wishlist</span>
-                          <span className="number">2</span>
+                          <span className="number">{wishlistCount}</span>
                         </Link>
                         <div className="btn-border-only cart category-hover-header">
                           <i className="fa-sharp fa-regular fa-cart-shopping" />
