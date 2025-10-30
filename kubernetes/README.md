@@ -1,10 +1,10 @@
-# Wanderlust Deployment on Kubernetes
+# EkoMart - E-Commerce Platform Deployment on Kubernetes
 
-### In this project, we will learn about how to deploy wanderlust application on Kubernetes.
+### In this project, we will learn about how to deploy EkoMart - E-Commerce Platform application on Kubernetes.
 
 ### Pre-requisites to implement this project:
 -  Create 2 AWS EC2 instance (Ubuntu) with instance type t2.medium and root volume 29GB.
--  Setup <a href="https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/kubeadm.md"><u> Kubeadm </a></u>
+-  Setup <a href="https://github.com/bashairfan0911/E-commerce-Prod/blob/dev/kubernetes/kubeadm.md"><u> Kubeadm </a></u>
 
 #
 ## Steps for Kubernetes deployment:
@@ -17,7 +17,7 @@ sudo su
 #
 2) Clone code from remote repository (GitHub) :
 ```bash
-git clone -b devops https://github.com/DevMadhup/wanderlust.git
+git clone -b dev https://github.com/bashairfan0911/E-commerce-Prod.git
 ```
 
 #
@@ -30,14 +30,14 @@ kubectl get nodes
 #
 4) Create kubernetes namespace :
 ```bash
-kubectl create namespace wanderlust
+kubectl create namespace EkoMart
 ```
 ![Namespace](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/namespace%20create.png)
 
 #
 5) Update kubernetes config context : 
 ```bash
-kubectl config set-context --current --namespace wanderlust
+kubectl config set-context --current --namespace EkoMart
 ```
 ![Update context](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/context%20wanderlust.png)
 
@@ -69,14 +69,14 @@ cd frontend
 #
 8) Edit .env.docker file and change the public IP Address with your worker node public IP :
 ```bash
-vi .env.docker
+vim .env.docker
 ```
 ![IP](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/frontend.env.docker.png)
 
 #
 9) Build frontend docker image : 
 ```bash
-docker build -t madhupdevops/frontend-wanderlust:v2.1.8 .
+docker build -t irfan8194/ecommerce-frontend:latest .
 ```
 ![Dockerfile frontend](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20frontend%20build.png)
 
@@ -100,7 +100,7 @@ cd ../backend/
 #
 12) Build backend docker image : 
 ```bash
-docker build -t madhupdevops/backend-wanderlust:v2.1.8 .
+docker build -t irfan8194/ecommerce-backend:latest .
 ```
 ![Backend dockerfile](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20backend%20build.png)
 
@@ -119,8 +119,8 @@ docker login
 ![docker login](https://github.com/DevMadhup/wanderlust/blob/devops/kubernetes/assets/docker%20login.png)
 
 ```bash
-docker push madhupdevops/frontend-wanderlust:v2.1.8
-docker push madhupdevops/backend-wanderlust:v2.1.8
+docker push irfan8194/ecommerce-frontend:latest
+docker push irfan8194/ecommerce-backend:latest
 ```
 
 #
