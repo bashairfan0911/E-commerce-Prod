@@ -1,34 +1,36 @@
-import { useState } from 'react'
+import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-import Home from './pages/Home/Home'
-import Error404 from './pages/Error404'
-import Wishlist from './pages/Wishlist/Wishlist'
-import Cart from './pages/Cart/Cart'
-import Login from './pages/User/Login'
-import Signup from './pages/User/Signup'
-import Account from './pages/User/Account'
-import UserDetails from './pages/User/UserDetails'
-import Order from './pages/User/Order'
-import OrderTracking from './pages/User/OrderTracking'
-import Address from './pages/User/Address'
-import AccountDetails from './pages/User/AccountDetails'
-import Logout from './pages/User/Logout'
-import Products from './pages/Products/Products'
-import SingleProduct from './pages/Products/SingleProduct'
-import Layout from './pages/admin/Layout'
-import Dashboard from './pages/admin/Dashboard'
-import AllProducts from './pages/admin/AllProducts'
-import AddProduct from './pages/admin/AddProduct'
-import EditProduct from './pages/admin/EditProduct'
-import Category from './pages/admin/Category'
-import AddCategory from './pages/admin/AddCategory'
-import Orders from './pages/admin/Orders'
-import AdminLogin from './pages/admin/AdminLogin'
 import ProtectedRoute from './components/ProtectedRoute'
-import Checkout from './pages/User/Checkout'
+
+// Lazy load all pages
+const Home = lazy(() => import('./pages/Home/Home'))
+const Error404 = lazy(() => import('./pages/Error404'))
+const Wishlist = lazy(() => import('./pages/Wishlist/Wishlist'))
+const Cart = lazy(() => import('./pages/Cart/Cart'))
+const Login = lazy(() => import('./pages/User/Login'))
+const Signup = lazy(() => import('./pages/User/Signup'))
+const Account = lazy(() => import('./pages/User/Account'))
+const UserDetails = lazy(() => import('./pages/User/UserDetails'))
+const Order = lazy(() => import('./pages/User/Order'))
+const OrderTracking = lazy(() => import('./pages/User/OrderTracking'))
+const Address = lazy(() => import('./pages/User/Address'))
+const AccountDetails = lazy(() => import('./pages/User/AccountDetails'))
+const Logout = lazy(() => import('./pages/User/Logout'))
+const Products = lazy(() => import('./pages/Products/Products'))
+const SingleProduct = lazy(() => import('./pages/Products/SingleProduct'))
+const Layout = lazy(() => import('./pages/admin/Layout'))
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'))
+const AllProducts = lazy(() => import('./pages/admin/AllProducts'))
+const AddProduct = lazy(() => import('./pages/admin/AddProduct'))
+const EditProduct = lazy(() => import('./pages/admin/EditProduct'))
+const Category = lazy(() => import('./pages/admin/Category'))
+const AddCategory = lazy(() => import('./pages/admin/AddCategory'))
+const Orders = lazy(() => import('./pages/admin/Orders'))
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
+const Checkout = lazy(() => import('./pages/User/Checkout'))
 
 
 function App() {
@@ -47,6 +49,7 @@ function App() {
        pauseOnHover
        theme="light"
      />
+     <Suspense fallback={<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>Loading...</div>}>
      <Routes>
       <Route path='/' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
       <Route path='/cart' element={<ProtectedRoute><Cart/></ProtectedRoute>}/>
@@ -84,6 +87,7 @@ function App() {
 
       <Route path='*' element={<Error404/>}/>
      </Routes>
+     </Suspense>
     </>
   )
 }
