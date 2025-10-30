@@ -3,7 +3,7 @@
 
 A full-stack MERN (MongoDB, Express, React, Node.js) e-commerce application with admin panel, product management, shopping cart, and payment integration using Razorpay.
 
-![Preview Image](https://github.com/bashairfan0911/E-commerce-Prod/blob/dev/Assets/images/image.png)
+![alt text](Assets/images/image.png)
 #
 
 # EkoMart - E-Commerce Platform Project End to End Implementation
@@ -11,7 +11,7 @@ A full-stack MERN (MongoDB, Express, React, Node.js) e-commerce application with
 ### In this demo, we will see how to deploy an end to end three tier MERN stack application on EKS cluster.
 #
 ### <mark>Project Deployment Flow:</mark>
-<img src="https://github.com/bashairfan0911/E-commerce-Prod/blob/dev/Assets/DevSecOps%2BGitOps-.gif" />
+![alt text](Assets/DevSecOps+GitOps-.gif)
 
 #
 
