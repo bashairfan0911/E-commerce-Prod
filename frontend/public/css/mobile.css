@@ -1475,6 +1475,7 @@ html {
 
 /* Hide on Mobile */
 @media only screen and (max-width: 767px) {
+
   .hide-mobile,
   .d-none-mobile {
     display: none !important;
@@ -1557,6 +1558,7 @@ html {
    LANDSCAPE ORIENTATION
    ======================================== */
 @media only screen and (max-width: 767px) and (orientation: landscape) {
+
   .banner,
   .hero-banner {
     min-height: 200px;
@@ -1608,6 +1610,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) {
+
   /* Force 2-column grid for products */
   .row.g-4,
   .row.g-3,
@@ -1873,6 +1876,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) {
+
   /* Larger touch targets for product actions */
   .single-action,
   .action-button {
@@ -1914,6 +1918,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) {
+
   /* Use GPU acceleration for animations */
   .single-shopping-card-one,
   .swiper-slide {
