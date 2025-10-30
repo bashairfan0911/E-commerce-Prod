@@ -1946,6 +1946,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) and (orientation: portrait) {
+
   /* Global Icon Size Reduction */
   i,
   .fa,
@@ -2062,9 +2063,9 @@ html {
   }
 
   /* Form Icons */
-  input[type="text"] + i,
-  input[type="email"] + i,
-  input[type="password"] + i {
+  input[type="text"]+i,
+  input[type="email"]+i,
+  input[type="password"]+i {
     font-size: 14px !important;
   }
 
@@ -2299,6 +2300,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 479px) and (orientation: portrait) {
+
   /* Make all icons even smaller on tiny screens */
   i,
   .fa,
@@ -2355,6 +2357,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) and (orientation: landscape) {
+
   /* Slightly larger icons in landscape for better visibility */
   i,
   .fa,
@@ -2376,16 +2379,17 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) {
+
   /* Reduce spacing around icons */
-  i + span,
-  i + p,
-  i + a {
+  i+span,
+  i+p,
+  i+a {
     margin-left: 4px !important;
   }
 
-  span + i,
-  p + i,
-  a + i {
+  span+i,
+  p+i,
+  a+i {
     margin-left: 4px !important;
   }
 
@@ -2450,6 +2454,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) {
+
   /* Ensure icon buttons are still touch-friendly despite smaller icons */
   button:has(i),
   .btn:has(i),
@@ -2476,6 +2481,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) {
+
   /* Logo Icon/Image */
   .logo img,
   .header-logo img,
@@ -2651,6 +2657,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) {
+
   /* Ensure icons are visible */
   i,
   .fa,
@@ -2683,6 +2690,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) {
+
   /* Reduce animation for better performance */
   i,
   .fa,
@@ -2702,6 +2710,7 @@ html {
 
   /* Disable complex animations on low-end devices */
   @media (prefers-reduced-motion: reduce) {
+
     i,
     .fa,
     [class*="fa-"] {
@@ -2716,6 +2725,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) {
+
   /* Vertical alignment */
   i,
   .fa,
@@ -2742,6 +2752,7 @@ html {
    ======================================== */
 
 @media only screen and (max-width: 767px) {
+
   /* Hide icons on mobile */
   .icon-hide-mobile,
   .hide-icon-mobile {
