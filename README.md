@@ -1,14 +1,12 @@
-https://github.com/bashairfan0911/E-commerce-Prod/blob/dev/Assets/images/image.png
-https://github.com/bashairfan0911/E-commerce-Prod/blob/dev/Assets/DevSecOps%2BGitOps-.gif
 
-# Wanderlust - Your Ultimate Travel Blog 🌍✈️
+# EkoMart - E-Commerce Platform
 
-WanderLust is a simple MERN travel blog website ✈ This project is aimed to help people to contribute in open source, upskill in react and also master git.
+A full-stack MERN (MongoDB, Express, React, Node.js) e-commerce application with admin panel, product management, shopping cart, and payment integration using Razorpay.
 
 ![Preview Image](https://github.com/bashairfan0911/E-commerce-Prod/blob/dev/Assets/images/image.png)
 #
 
-# Wanderlust Mega Project End to End Implementation
+# EkoMart - E-Commerce Platform Project End to End Implementation
 
 ### In this demo, we will see how to deploy an end to end three tier MERN stack application on EKS cluster.
 #
