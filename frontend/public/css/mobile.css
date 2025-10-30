@@ -1940,3 +1940,838 @@ html {
     }
   }
 }
+
+/* ========================================
+   MOBILE PORTRAIT - ICON SIZE FIXES
+   ======================================== */
+
+@media only screen and (max-width: 767px) and (orientation: portrait) {
+  /* Global Icon Size Reduction */
+  i,
+  .fa,
+  .fas,
+  .far,
+  .fal,
+  .fab,
+  .fad,
+  [class*="fa-"] {
+    font-size: 14px !important;
+  }
+
+  /* Header Icons */
+  header i,
+  .header i,
+  .navbar i {
+    font-size: 16px !important;
+  }
+
+  /* Navigation Icons */
+  .nav-link i,
+  .menu-item i {
+    font-size: 14px !important;
+    margin-right: 5px !important;
+  }
+
+  /* Product Action Icons - Make Much Smaller */
+  .single-action i,
+  .action-share-option i {
+    font-size: 11px !important;
+  }
+
+  .single-action {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+  }
+
+  /* Wishlist Icon */
+  .fa-heart {
+    font-size: 12px !important;
+  }
+
+  /* Compare Icon */
+  .fa-arrows-retweet {
+    font-size: 11px !important;
+  }
+
+  /* Quick View Icon */
+  .fa-eye {
+    font-size: 12px !important;
+  }
+
+  /* Cart Icon */
+  .fa-shopping-cart,
+  .fa-cart-shopping,
+  .fa-bag-shopping {
+    font-size: 16px !important;
+  }
+
+  /* User Icon */
+  .fa-user,
+  .fa-user-circle {
+    font-size: 16px !important;
+  }
+
+  /* Search Icon */
+  .fa-search,
+  .fa-magnifying-glass {
+    font-size: 14px !important;
+  }
+
+  /* Menu/Hamburger Icon */
+  .fa-bars,
+  .fa-navicon {
+    font-size: 18px !important;
+  }
+
+  /* Close Icon */
+  .fa-times,
+  .fa-xmark,
+  .fa-close {
+    font-size: 16px !important;
+  }
+
+  /* Star Rating Icons */
+  .fa-star {
+    font-size: 10px !important;
+  }
+
+  /* Badge Icons */
+  .badge i,
+  .discount-badge i {
+    font-size: 8px !important;
+  }
+
+  /* Footer Icons */
+  footer i {
+    font-size: 14px !important;
+  }
+
+  /* Social Media Icons */
+  .social-icon i,
+  .social-media i {
+    font-size: 16px !important;
+  }
+
+  /* Button Icons */
+  button i,
+  .btn i,
+  a.btn i {
+    font-size: 12px !important;
+    margin-right: 4px !important;
+  }
+
+  /* Form Icons */
+  input[type="text"] + i,
+  input[type="email"] + i,
+  input[type="password"] + i {
+    font-size: 14px !important;
+  }
+
+  /* Dropdown Icons */
+  .dropdown-toggle i,
+  .select-icon i {
+    font-size: 12px !important;
+  }
+
+  /* Arrow Icons */
+  .fa-arrow-right,
+  .fa-arrow-left,
+  .fa-arrow-up,
+  .fa-arrow-down,
+  .fa-chevron-right,
+  .fa-chevron-left,
+  .fa-chevron-up,
+  .fa-chevron-down,
+  .fa-angle-right,
+  .fa-angle-left,
+  .fa-angle-up,
+  .fa-angle-down {
+    font-size: 12px !important;
+  }
+
+  /* Plus/Minus Icons (Quantity) */
+  .fa-plus,
+  .fa-minus {
+    font-size: 11px !important;
+  }
+
+  /* Check/Success Icons */
+  .fa-check,
+  .fa-check-circle {
+    font-size: 13px !important;
+  }
+
+  /* Warning/Error Icons */
+  .fa-exclamation,
+  .fa-exclamation-circle,
+  .fa-exclamation-triangle {
+    font-size: 14px !important;
+  }
+
+  /* Info Icons */
+  .fa-info,
+  .fa-info-circle {
+    font-size: 13px !important;
+  }
+
+  /* Location/Map Icons */
+  .fa-map-marker,
+  .fa-location-dot,
+  .fa-map-pin {
+    font-size: 14px !important;
+  }
+
+  /* Phone Icons */
+  .fa-phone,
+  .fa-mobile {
+    font-size: 14px !important;
+  }
+
+  /* Email Icons */
+  .fa-envelope {
+    font-size: 14px !important;
+  }
+
+  /* Calendar Icons */
+  .fa-calendar {
+    font-size: 13px !important;
+  }
+
+  /* Clock/Time Icons */
+  .fa-clock {
+    font-size: 13px !important;
+  }
+
+  /* Filter Icons */
+  .fa-filter,
+  .fa-sliders {
+    font-size: 14px !important;
+  }
+
+  /* Sort Icons */
+  .fa-sort,
+  .fa-sort-up,
+  .fa-sort-down {
+    font-size: 13px !important;
+  }
+
+  /* Grid/List View Icons */
+  .fa-th,
+  .fa-th-large,
+  .fa-list {
+    font-size: 14px !important;
+  }
+
+  /* Share Icons */
+  .fa-share,
+  .fa-share-alt {
+    font-size: 13px !important;
+  }
+
+  /* Download Icons */
+  .fa-download {
+    font-size: 13px !important;
+  }
+
+  /* Upload Icons */
+  .fa-upload {
+    font-size: 13px !important;
+  }
+
+  /* Edit Icons */
+  .fa-edit,
+  .fa-pen,
+  .fa-pencil {
+    font-size: 12px !important;
+  }
+
+  /* Delete/Trash Icons */
+  .fa-trash,
+  .fa-trash-alt {
+    font-size: 12px !important;
+  }
+
+  /* Settings/Gear Icons */
+  .fa-cog,
+  .fa-gear {
+    font-size: 14px !important;
+  }
+
+  /* Bookmark Icons */
+  .fa-bookmark {
+    font-size: 10px !important;
+  }
+
+  /* Tag Icons */
+  .fa-tag,
+  .fa-tags {
+    font-size: 11px !important;
+  }
+
+  /* Image/Photo Icons */
+  .fa-image,
+  .fa-camera {
+    font-size: 13px !important;
+  }
+
+  /* Video Icons */
+  .fa-video,
+  .fa-play {
+    font-size: 13px !important;
+  }
+
+  /* Spinner/Loading Icons */
+  .fa-spinner,
+  .fa-circle-notch {
+    font-size: 16px !important;
+  }
+
+  /* Bell/Notification Icons */
+  .fa-bell {
+    font-size: 15px !important;
+  }
+
+  /* Question/Help Icons */
+  .fa-question,
+  .fa-question-circle {
+    font-size: 13px !important;
+  }
+
+  /* Home Icons */
+  .fa-home,
+  .fa-house {
+    font-size: 15px !important;
+  }
+
+  /* Dashboard Icons */
+  .fa-dashboard,
+  .fa-tachometer {
+    font-size: 15px !important;
+  }
+
+  /* Box/Package Icons */
+  .fa-box,
+  .fa-boxes {
+    font-size: 14px !important;
+  }
+
+  /* Truck/Delivery Icons */
+  .fa-truck,
+  .fa-shipping-fast {
+    font-size: 14px !important;
+  }
+
+  /* Credit Card Icons */
+  .fa-credit-card {
+    font-size: 14px !important;
+  }
+
+  /* Money/Dollar Icons */
+  .fa-dollar,
+  .fa-money-bill {
+    font-size: 13px !important;
+  }
+
+  /* Percentage Icons */
+  .fa-percent {
+    font-size: 11px !important;
+  }
+
+  /* Gift Icons */
+  .fa-gift {
+    font-size: 13px !important;
+  }
+
+  /* Barcode Icons */
+  .fa-barcode {
+    font-size: 13px !important;
+  }
+
+  /* QR Code Icons */
+  .fa-qrcode {
+    font-size: 13px !important;
+  }
+}
+
+/* ========================================
+   EXTRA SMALL MOBILE - EVEN SMALLER ICONS
+   ======================================== */
+
+@media only screen and (max-width: 479px) and (orientation: portrait) {
+  /* Make all icons even smaller on tiny screens */
+  i,
+  .fa,
+  [class*="fa-"] {
+    font-size: 12px !important;
+  }
+
+  /* Product Action Icons - Extra Small */
+  .single-action i {
+    font-size: 10px !important;
+  }
+
+  .single-action {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  /* Header Icons */
+  header i,
+  .navbar i {
+    font-size: 14px !important;
+  }
+
+  /* Cart/User Icons */
+  .fa-shopping-cart,
+  .fa-user {
+    font-size: 14px !important;
+  }
+
+  /* Menu Icon */
+  .fa-bars {
+    font-size: 16px !important;
+  }
+
+  /* Button Icons */
+  button i,
+  .btn i {
+    font-size: 11px !important;
+  }
+
+  /* Star Rating */
+  .fa-star {
+    font-size: 9px !important;
+  }
+
+  /* Badge Icons */
+  .badge i {
+    font-size: 7px !important;
+  }
+}
+
+/* ========================================
+   LANDSCAPE MODE - ICON ADJUSTMENTS
+   ======================================== */
+
+@media only screen and (max-width: 767px) and (orientation: landscape) {
+  /* Slightly larger icons in landscape for better visibility */
+  i,
+  .fa,
+  [class*="fa-"] {
+    font-size: 13px !important;
+  }
+
+  .single-action i {
+    font-size: 11px !important;
+  }
+
+  header i {
+    font-size: 15px !important;
+  }
+}
+
+/* ========================================
+   ICON SPACING ADJUSTMENTS
+   ======================================== */
+
+@media only screen and (max-width: 767px) {
+  /* Reduce spacing around icons */
+  i + span,
+  i + p,
+  i + a {
+    margin-left: 4px !important;
+  }
+
+  span + i,
+  p + i,
+  a + i {
+    margin-left: 4px !important;
+  }
+
+  /* Icon-only buttons */
+  button:has(i:only-child),
+  .btn:has(i:only-child) {
+    padding: 8px !important;
+    width: auto !important;
+    min-width: 36px !important;
+  }
+
+  /* Icon containers */
+  .icon-wrapper,
+  .icon-container {
+    width: 30px !important;
+    height: 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Icon badges (notification counts) */
+  .icon-badge,
+  .badge-count {
+    font-size: 9px !important;
+    min-width: 16px !important;
+    height: 16px !important;
+    padding: 2px 4px !important;
+  }
+}
+
+/* ========================================
+   SVG ICONS (if using SVG instead of fonts)
+   ======================================== */
+
+@media only screen and (max-width: 767px) {
+  svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .single-action svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  header svg,
+  .navbar svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  button svg,
+  .btn svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+}
+
+/* ========================================
+   ICON BUTTON TOUCH TARGETS
+   ======================================== */
+
+@media only screen and (max-width: 767px) {
+  /* Ensure icon buttons are still touch-friendly despite smaller icons */
+  button:has(i),
+  .btn:has(i),
+  a:has(i) {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Exception for inline text with icons */
+  p:has(i),
+  span:has(i),
+  .text-with-icon {
+    min-width: auto !important;
+    min-height: auto !important;
+  }
+}
+
+
+/* ========================================
+   SPECIFIC COMPONENT ICON FIXES
+   ======================================== */
+
+@media only screen and (max-width: 767px) {
+  /* Logo Icon/Image */
+  .logo img,
+  .header-logo img,
+  .navbar-brand img {
+    max-height: 35px !important;
+    width: auto !important;
+  }
+
+  /* Category Icons */
+  .category-icon,
+  .cat-icon {
+    font-size: 20px !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  /* Feature Icons */
+  .feature-icon,
+  .service-icon {
+    font-size: 24px !important;
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  /* Testimonial Icons */
+  .testimonial-icon,
+  .quote-icon {
+    font-size: 18px !important;
+  }
+
+  /* Payment Method Icons */
+  .payment-icon {
+    max-height: 25px !important;
+    width: auto !important;
+  }
+
+  /* Language/Currency Icons */
+  .language-icon,
+  .currency-icon {
+    font-size: 13px !important;
+  }
+
+  /* Breadcrumb Icons */
+  .breadcrumb i {
+    font-size: 10px !important;
+  }
+
+  /* Accordion/Collapse Icons */
+  .accordion-icon,
+  .collapse-icon {
+    font-size: 12px !important;
+  }
+
+  /* Tab Icons */
+  .tab-icon {
+    font-size: 13px !important;
+    margin-right: 5px !important;
+  }
+
+  /* Step/Progress Icons */
+  .step-icon,
+  .progress-icon {
+    font-size: 16px !important;
+    width: 35px !important;
+    height: 35px !important;
+  }
+
+  /* Alert/Toast Icons */
+  .alert i,
+  .toast i,
+  .notification i {
+    font-size: 15px !important;
+  }
+
+  /* Modal Header Icons */
+  .modal-header i {
+    font-size: 16px !important;
+  }
+
+  /* Sidebar Icons */
+  .sidebar i,
+  .offcanvas i {
+    font-size: 14px !important;
+  }
+
+  /* Card Header Icons */
+  .card-header i {
+    font-size: 13px !important;
+  }
+
+  /* List Item Icons */
+  li i,
+  .list-item i {
+    font-size: 11px !important;
+    margin-right: 6px !important;
+  }
+
+  /* Input Group Icons */
+  .input-group i,
+  .input-group-text i {
+    font-size: 13px !important;
+  }
+
+  /* Tooltip Icons */
+  .tooltip i,
+  [data-tooltip] i {
+    font-size: 12px !important;
+  }
+
+  /* Popover Icons */
+  .popover i {
+    font-size: 13px !important;
+  }
+
+  /* Carousel/Slider Navigation Icons */
+  .carousel-control i,
+  .slider-nav i,
+  .swiper-button-next i,
+  .swiper-button-prev i {
+    font-size: 16px !important;
+  }
+
+  /* Pagination Icons */
+  .pagination i {
+    font-size: 11px !important;
+  }
+
+  /* Table Icons */
+  table i,
+  .table i {
+    font-size: 12px !important;
+  }
+
+  /* Form Validation Icons */
+  .valid-feedback i,
+  .invalid-feedback i {
+    font-size: 12px !important;
+  }
+
+  /* Loading/Spinner Overlay */
+  .loading-overlay i,
+  .spinner-overlay i {
+    font-size: 30px !important;
+  }
+
+  /* Empty State Icons */
+  .empty-state i,
+  .no-data i {
+    font-size: 40px !important;
+  }
+
+  /* Avatar Icons */
+  .avatar i,
+  .user-avatar i {
+    font-size: 18px !important;
+  }
+
+  /* Status Icons */
+  .status-icon {
+    font-size: 10px !important;
+    width: 10px !important;
+    height: 10px !important;
+  }
+
+  /* Counter/Badge Icons */
+  .counter-icon {
+    font-size: 11px !important;
+  }
+}
+
+/* ========================================
+   ICON COLOR & VISIBILITY FIXES
+   ======================================== */
+
+@media only screen and (max-width: 767px) {
+  /* Ensure icons are visible */
+  i,
+  .fa,
+  [class*="fa-"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Icon hover states - reduce on mobile */
+  i:hover,
+  .fa:hover {
+    transform: scale(1.05) !important;
+  }
+
+  /* Disabled icons */
+  i.disabled,
+  .disabled i {
+    opacity: 0.5 !important;
+  }
+
+  /* Active icons */
+  i.active,
+  .active i {
+    color: var(--color-primary) !important;
+  }
+}
+
+/* ========================================
+   ICON ANIMATION PERFORMANCE
+   ======================================== */
+
+@media only screen and (max-width: 767px) {
+  /* Reduce animation for better performance */
+  i,
+  .fa,
+  [class*="fa-"] {
+    transition: all 0.2s ease !important;
+  }
+
+  /* Spinning icons */
+  .fa-spin {
+    animation-duration: 1s !important;
+  }
+
+  /* Pulsing icons */
+  .fa-pulse {
+    animation-duration: 1s !important;
+  }
+
+  /* Disable complex animations on low-end devices */
+  @media (prefers-reduced-motion: reduce) {
+    i,
+    .fa,
+    [class*="fa-"] {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+/* ========================================
+   ICON ALIGNMENT FIXES
+   ======================================== */
+
+@media only screen and (max-width: 767px) {
+  /* Vertical alignment */
+  i,
+  .fa,
+  [class*="fa-"] {
+    vertical-align: middle !important;
+    line-height: 1 !important;
+  }
+
+  /* Flex alignment */
+  .d-flex i,
+  .flex i {
+    align-self: center !important;
+  }
+
+  /* Grid alignment */
+  .d-grid i,
+  .grid i {
+    place-self: center !important;
+  }
+}
+
+/* ========================================
+   ICON RESPONSIVE UTILITIES
+   ======================================== */
+
+@media only screen and (max-width: 767px) {
+  /* Hide icons on mobile */
+  .icon-hide-mobile,
+  .hide-icon-mobile {
+    display: none !important;
+  }
+
+  /* Show icons only on mobile */
+  .icon-show-mobile,
+  .show-icon-mobile {
+    display: inline-block !important;
+  }
+
+  /* Icon size utilities */
+  .icon-xs {
+    font-size: 10px !important;
+  }
+
+  .icon-sm {
+    font-size: 12px !important;
+  }
+
+  .icon-md {
+    font-size: 14px !important;
+  }
+
+  .icon-lg {
+    font-size: 16px !important;
+  }
+
+  .icon-xl {
+    font-size: 20px !important;
+  }
+}
