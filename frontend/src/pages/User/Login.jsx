@@ -31,12 +31,12 @@ function Login() {
       }, 1000)
     } catch (error) {
       toast.update(toastId, {
-        render: error.response.data.message,
+        render: error.response?.data?.message || error.message || "Connection failed. Please check if backend is running.",
         type: "error",
         isLoading: false,
         autoClose: 3000
       })
-      // console.log(error)
+      console.error("Login error:", error)
     }
   }
 
