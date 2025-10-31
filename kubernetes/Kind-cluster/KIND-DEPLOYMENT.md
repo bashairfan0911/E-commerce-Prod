@@ -21,7 +21,18 @@ docker build -t ecommerce-backend:latest ./backend
 docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
 kind load docker-image ecommerce-backend:latest --name ecommerce
 kind load docker-image ecommerce-frontend:latest --name ecommerce
-.\kubernetes\Kind-cluster\deploy-to-kind.ps1
+
+# Deploy with persistent storage
+kubectl create namespace ekomart
+kubectl config set-context --current --namespace=ekomart
+kubectl apply -f kubernetes/Kind-cluster/mongodb-persistent.yaml
+kubectl apply -f kubernetes/Kind-cluster/backend-kind.yaml
+kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
+
+# Wait for pods and seed database
+kubectl wait --for=condition=ready pod -l app=mongo --timeout=120s
+kubectl wait --for=condition=ready pod -l app=backend --timeout=120s
+kubectl exec -n ekomart deployment/backend-deployment -- node seedData.js
 ```
 
 Then open http://localhost:31000 and press Ctrl+Shift+R
@@ -63,11 +74,22 @@ kubectl config set-context --current --namespace=ekomart
 ```
 
 **Deploy services in order:**
+
+**Option A: With Persistent Storage (Recommended)**
+```bash
+kubectl apply -f kubernetes/Kind-cluster/mongodb-persistent.yaml
+kubectl apply -f kubernetes/Kind-cluster/backend-kind.yaml
+kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
+```
+
+**Option B: Without Persistent Storage (Temporary)**
 ```bash
 kubectl apply -f kubernetes/Kind-cluster/mongodb-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/backend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
 ```
+
+**Note**: Option A keeps your data (user accounts, orders) across pod restarts. Option B loses all data when pods restart.
 
 **Or use the automated deployment script:**
 
@@ -153,7 +175,50 @@ Server is running on port 5000
 5. Browse products and add items to cart
 6. Proceed to checkout
 
-**Note**: If you see errors like "ERR_CONNECTION_REFUSED" or requests going to `localhost:5000`, you need to clear your browser cache with a hard refresh.
+**Important Notes**:
+- If you see errors like "ERR_CONNECTION_REFUSED" or requests going to `localhost:5000`, do a hard refresh
+- **User accounts are lost on pod restart** unless you use persistent storage (see below)
+- Products are seeded automatically but you need to create your account each time
+
+## Persistent Storage
+
+**Recommended Setup**: The deployment now uses persistent storage by default.
+
+### What is Persistent Storage?
+
+- **With Persistent Storage** (`mongodb-persistent.yaml`): User accounts, products, and orders survive pod restarts
+- **Without Persistent Storage** (`mongodb-kind.yaml`): All data is lost when MongoDB pod restarts
+
+### Switching Between Storage Types
+
+**To use persistent storage (recommended):**
+```bash
+kubectl delete deployment mongo-deployment -n ekomart
+kubectl apply -f kubernetes/Kind-cluster/mongodb-persistent.yaml
+kubectl rollout restart deployment/backend-deployment -n ekomart
+```
+
+**To use temporary storage:**
+```bash
+kubectl delete deployment mongo-deployment -n ekomart
+kubectl delete pvc mongo-pvc -n ekomart
+kubectl delete pv mongo-pv
+kubectl apply -f kubernetes/Kind-cluster/mongodb-kind.yaml
+kubectl rollout restart deployment/backend-deployment -n ekomart
+```
+
+### Verify Persistent Storage
+
+```bash
+# Check PersistentVolumeClaim
+kubectl get pvc -n ekomart
+
+# Should show:
+# NAME        STATUS   VOLUME     CAPACITY   ACCESS MODES
+# mongo-pvc   Bound    mongo-pv   1Gi        RWO
+```
+
+**Note**: Data persists across pod restarts but is lost if you delete the entire Kind cluster with `kind delete cluster`
 
 ## Troubleshooting
 
@@ -244,8 +309,10 @@ kubectl delete namespace ekomart
 - Nginx in frontend proxies `/api/` requests to `backend-service:5000/api/`
 
 ### Storage
-- MongoDB uses `emptyDir` for storage (data is lost when pod restarts)
-- For persistent storage, configure hostPath volumes in Kind cluster
+- **Recommended**: Use `mongodb-persistent.yaml` for persistent storage (keeps data across pod restarts)
+- **Alternative**: Use `mongodb-kind.yaml` for temporary storage (data lost on pod restart)
+- Persistent data is stored in Kind node at `/data/mongo`
+- Data survives pod restarts but not cluster deletion (`kind delete cluster`)
 
 ### Images
 - Kind uses `imagePullPolicy: Never` to use locally loaded images
@@ -289,3 +356,9 @@ kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
 
 **Issue**: Changes not reflecting in browser
 **Solution**: Always do a hard refresh (Ctrl+Shift+R) after updating deployments
+
+**Issue**: Username/password wrong after redeploying
+**Solution**: If using temporary storage (`mongodb-kind.yaml`), data is lost on restart. Solutions:
+1. **Use persistent storage**: Deploy with `mongodb-persistent.yaml` (recommended)
+2. **Recreate your account**: Sign up again after each deployment
+3. **Check storage type**: Run `kubectl get pvc -n ekomart` to verify persistent storage is active
