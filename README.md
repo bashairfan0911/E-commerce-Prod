@@ -41,6 +41,32 @@ A full-stack MERN (MongoDB, Express, React, Node.js) e-commerce application with
 > [!Important]
 > Below table helps you to navigate to the particular tool installation section fast.
 
+## 🚀 Quick Start - Local Development
+
+Want to try the application locally without AWS? Deploy on Kind (Kubernetes in Docker):
+
+**📁 [Kind Cluster Deployment Guide](kubernetes/Kind-cluster/KIND-DEPLOYMENT.md)**
+
+Quick deploy:
+```bash
+kind create cluster --name ecommerce --config kubernetes/Kind-cluster/kind-config.yaml
+docker build -t ecommerce-backend:latest ./backend
+docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
+kind load docker-image ecommerce-backend:latest --name ecommerce
+kind load docker-image ecommerce-frontend:latest --name ecommerce
+kubectl create namespace ekomart
+kubectl apply -f kubernetes/Kind-cluster/backend-atlas.yaml
+kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
+```
+
+Access at: http://localhost:31000
+
+---
+
+## 🏢 Production Deployment - AWS EKS
+
+For full production deployment with CI/CD pipeline:
+
 | Tech stack    | Installation |
 | -------- | ------- |
 | Jenkins Master | <a href="#Jenkins">Install and configure Jenkins</a>     |
