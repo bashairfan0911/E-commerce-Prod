@@ -6,9 +6,9 @@ import cartModel from "../Models/cartModel.js";
 // Initialize Razorpay only if credentials are provided
 let razorpayInstance = null;
 
-if (process.env.KEY_ID && process.env.KEY_SECRET && 
-    process.env.KEY_ID !== 'your_razorpay_key_id' && 
-    process.env.KEY_SECRET !== 'your_razorpay_key_secret') {
+if (process.env.KEY_ID && process.env.KEY_SECRET &&
+  process.env.KEY_ID !== 'your_razorpay_key_id' &&
+  process.env.KEY_SECRET !== 'your_razorpay_key_secret') {
   razorpayInstance = new Razorpay({
     key_id: process.env.KEY_ID,
     key_secret: process.env.KEY_SECRET,
@@ -28,9 +28,9 @@ export const createOrder = async (req, res) => {
     const estimatedDelivery = new Date();
     estimatedDelivery.setDate(estimatedDelivery.getDate() + 6);
 
-    const newOrder = new orderModel({ 
-      userId, 
-      items, 
+    const newOrder = new orderModel({
+      userId,
+      items,
       totalAmount,
       shippingAddress,
       paymentMethod: paymentMethod || 'cash',
@@ -42,34 +42,34 @@ export const createOrder = async (req, res) => {
         timestamp: new Date()
       }]
     })
-    
-    const user = await userModel.findOne({_id: userId})
+
+    const user = await userModel.findOne({ _id: userId })
     user.order.push(newOrder._id)
     await newOrder.save()
     await user.save()
-    
+
     // Clear the user's cart after order is placed
     await cartModel.findOneAndUpdate(
       { user: userId },
       { $set: { products: [] } }
     );
     console.log('Cart cleared for user:', userId);
-    
-    res.status(200).json({message: "Order created", order: newOrder})
+
+    res.status(200).json({ message: "Order created", order: newOrder })
   } catch (error) {
     console.error('Error creating order:', error);
-    res.status(500).json({ message: 'Error creating order'});
+    res.status(500).json({ message: 'Error creating order' });
   }
 
 }
 
-export const showOrder = async(req,res)=>{
-  const {orderId} = req.params
+export const showOrder = async (req, res) => {
+  const { orderId } = req.params
   console.log(orderId)
 
   try {
-    const order = await orderModel.findOne({_id: orderId}).populate('items.productId')
-    
+    const order = await orderModel.findOne({ _id: orderId }).populate('items.productId')
+
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -98,10 +98,10 @@ export const showOrder = async(req,res)=>{
       console.warn(`⚠️  Order ${orderId} has ${missingProducts.length} missing products`);
     }
 
-    res.status(200).json({message: "order fetched successfully", order: order})
+    res.status(200).json({ message: "order fetched successfully", order: order })
   } catch (error) {
     console.error('Error fetching order:', error);
-    res.status(500).json({ message: 'Error in finding order'});
+    res.status(500).json({ message: 'Error in finding order' });
   }
 }
 
@@ -111,7 +111,7 @@ export const updateOrderStatus = async (req, res) => {
 
   try {
     const order = await orderModel.findById(orderId);
-    
+
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -138,7 +138,7 @@ export const cancelOrder = async (req, res) => {
 
   try {
     const order = await orderModel.findById(orderId);
-    
+
     if (!order) {
       console.log('Order not found:', orderId);
       return res.status(404).json({ message: 'Order not found' });
@@ -150,18 +150,18 @@ export const cancelOrder = async (req, res) => {
     const currentStatus = order.orderStatus || 'pending';
     if (['shipped', 'out_for_delivery', 'delivered', 'cancelled'].includes(currentStatus)) {
       console.log('Cannot cancel order with status:', currentStatus);
-      return res.status(400).json({ 
-        message: `Cannot cancel order that is ${currentStatus}` 
+      return res.status(400).json({
+        message: `Cannot cancel order that is ${currentStatus}`
       });
     }
 
     order.orderStatus = 'cancelled';
-    
+
     // Initialize trackingHistory if it doesn't exist
     if (!order.trackingHistory) {
       order.trackingHistory = [];
     }
-    
+
     order.trackingHistory.push({
       status: 'cancelled',
       message: 'Order cancelled by customer',
@@ -178,27 +178,44 @@ export const cancelOrder = async (req, res) => {
 };
 
 export const startPayment = async (req, res) => {
-  // Check if Razorpay is configured
-  if (!razorpayInstance) {
-    return res.status(503).json({ 
-      message: "Payment service not configured. Please add Razorpay credentials to .env file" 
-    });
-  }
-
   const { amount, currency } = req.body;
 
-  const options = {
+  // If Razorpay is configured, use real integration
+  if (razorpayInstance) {
+    const options = {
+      amount: amount * 100,
+      currency: currency || "INR",
+      receipt: `receipt#${Math.random() * 10000}`,
+    };
+
+    try {
+      const order = await razorpayInstance.orders.create(options);
+      return res.status(200).json({ message: "Order successfully", order: order });
+    } catch (error) {
+      return res.status(500).json({ message: "No order created" });
+    }
+  }
+
+  // Mock Razorpay response for testing
+  console.log('🧪 Using mock Razorpay payment (test mode)');
+  const mockOrder = {
+    id: `order_mock_${Date.now()}`,
+    entity: "order",
     amount: amount * 100,
+    amount_paid: 0,
+    amount_due: amount * 100,
     currency: currency || "INR",
     receipt: `receipt#${Math.random() * 10000}`,
+    status: "created",
+    attempts: 0,
+    created_at: Math.floor(Date.now() / 1000)
   };
 
-  try {
-    const order = await razorpayInstance.orders.create(options);
-    res.status(200).json({ message: "Order successfully", order: order });
-  } catch (error) {
-    res.status(500).json({ message: "No order created" });
-  }
+  res.status(200).json({
+    message: "Mock order created successfully",
+    order: mockOrder,
+    isMock: true
+  });
 };
 
 
@@ -209,7 +226,7 @@ export const getAllOrders = async (req, res) => {
       .populate('userId', 'firstname lastname email')
       .populate('items.productId', 'title images')
       .sort({ createdAt: -1 });
-    
+
     res.status(200).json({
       message: "All orders fetched successfully",
       orders: orders,

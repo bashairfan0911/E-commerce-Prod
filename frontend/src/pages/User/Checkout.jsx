@@ -136,8 +136,30 @@ function Checkout() {
             }
 
             const { amount, id: order_id, currency } = response.data.order;
+            const isMockPayment = response.data.isMock;
             console.log(response)
 
+            // Mock payment mode - simulate successful payment
+            if (isMockPayment) {
+                toast.info("🧪 Test Mode: Simulating payment...", { autoClose: 2000 });
+                
+                // Simulate payment processing delay
+                setTimeout(() => {
+                    toast.success("✅ Mock payment successful! (Test Mode)");
+                    console.log("Mock payment completed:", {
+                        razorpay_payment_id: `pay_mock_${Date.now()}`,
+                        razorpay_order_id: order_id,
+                        razorpay_signature: `sig_mock_${Date.now()}`
+                    });
+                    
+                    setTimeout(() => {
+                        window.location.href = '/account/order';
+                    }, 2000);
+                }, 1500);
+                return;
+            }
+
+            // Real Razorpay integration
             // Check if Razorpay script is loaded
             if (!window.Razorpay) {
                 toast.error("Payment gateway not loaded. Please refresh the page or use Cash on Delivery.");
