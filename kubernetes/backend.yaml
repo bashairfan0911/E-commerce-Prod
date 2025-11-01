@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-deployment
-  namespace: EkoMart 
+  namespace: ekomart
   labels:
     app: backend
 spec:
@@ -17,41 +17,41 @@ spec:
         app: backend
     spec:
       containers:
-        - name: backend
-          image: trainwithshubham/wanderlust-backend-beta:v2.1
-          ports:
-            - containerPort: 5000
-          env:
-            - name: NODE_ENV
-              value: "production"
-            - name: PORT
-              value: "5000"
-            - name: DBURI
-              value: "mongodb://mongo-service:27017/ekomart"
-            - name: JWT_SECRET_KEY
-              value: "TN3TY7aH4qVFwRgJHvlsmaATH8RrrTBH"
-            - name: CLOUD_NAME
-              value: "drukumhal"
-            - name: CLOUD_API_KEY
-              value: "517746727976313"
-            - name: CLOUD_API_SECRET_KEY
-              value: "EZmCUOotMuHeSwTx79ro8vuzt3k"
-            - name: KEY_ID
-              value: "your_razorpay_key_id"
-            - name: KEY_SECRET
-              value: "your_razorpay_key_secret"
+      - name: backend
+        image: irfan8194/ecommerce-backend
+        ports:
+        - containerPort: 5000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "5000"
+        - name: DBURI
+          value: "mongodb+srv://bashairfan518:Irfan86101@cluster0.hwcnddm.mongodb.net/ekomart?retryWrites=true&w=majority"
+        - name: JWT_SECRET_KEY
+          value: "TN3TY7aH4qVFwRgJHvlsmaATH8RrrTBH"
+        - name: CLOUD_NAME
+          value: "drukumhal"
+        - name: CLOUD_API_KEY
+          value: "517746727976313"
+        - name: CLOUD_API_SECRET_KEY
+          value: "EZmCUOotMuHeSwTx79ro8vuzt3k"
+        - name: KEY_ID
+          value: "your_razorpay_key_id"
+        - name: KEY_SECRET
+          value: "your_razorpay_key_secret"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: backend-service
-  namespace: EkoMart 
+  namespace: ekomart
 spec:
   type: NodePort
   selector:
     app: backend
   ports:
-    - port: 5000
-      targetPort: 5000
-      protocol: TCP
-      nodePort: 31100
+  - port: 5000
+    targetPort: 5000
+    protocol: TCP
+    nodePort: 31100
