@@ -1,6 +1,6 @@
 resource "aws_key_pair" "deployer" {
   key_name   = "terra-automate-key"
-  public_key = file("/Users/shubham/Documents/work/TrainWithShubham/terra-practice/terra-key.pub")
+  public_key = file("${path.module}/terra-automate-key.pub")
 }
 
 resource "aws_default_vpc" "default" {
@@ -39,6 +39,54 @@ resource "aws_security_group" "allow_user_to_connect" {
     description = "port 443 allow"
     from_port   = 443
     to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "NodePort range for Kubernetes"
+    from_port   = 30000
+    to_port     = 32767
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Redis"
+    from_port   = 6379
+    to_port     = 6379
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "SMTPS"
+    from_port   = 465
+    to_port     = 465
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Application ports"
+    from_port   = 3000
+    to_port     = 10000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "SMTP"
+    from_port   = 25
+    to_port     = 25
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Kubernetes API"
+    from_port   = 6443
+    to_port     = 6443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

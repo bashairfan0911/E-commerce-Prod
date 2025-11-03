@@ -149,7 +149,7 @@ sudo apt-get install jenkins -y
   
   - <b>Create EKS Cluster (Master machine)</b>
   ```bash
-  eksctl create cluster --name=wanderlust \
+  eksctl create cluster --name=EkoMart \
                       --region=us-east-2 \
                       --version=1.30 \
                       --without-nodegroup
@@ -158,15 +158,15 @@ sudo apt-get install jenkins -y
   ```bash
   eksctl utils associate-iam-oidc-provider \
     --region us-east-2 \
-    --cluster wanderlust \
+    --cluster EkoMart \
     --approve
   ```
   - <b>Create Nodegroup (Master machine)</b>
   ```bash
-  eksctl create nodegroup --cluster=wanderlust \
+  eksctl create nodegroup --cluster=EkoMart \
                        --region=us-east-2 \
-                       --name=wanderlust \
-                       --node-type=t2.large \
+                       --name=EkoMart \
+                       --node-type=m7i-flex.large \
                        --nodes=2 \
                        --nodes-min=2 \
                        --nodes-max=2 \

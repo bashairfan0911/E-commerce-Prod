@@ -32,7 +32,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script{
-                    code_checkout("https://github.com/bashairfan0911/E-commerce-Prod.git","dev")
+                    code_checkout("https://github.com/bashairfan0911/E-commerce-Prod.git","test-dev")
                 }
             }
         }
@@ -56,7 +56,7 @@ pipeline {
         stage("SonarQube: Code Analysis"){
             steps{
                 script{
-                    sonarqube_analysis("Sonar","wanderlust","wanderlust")             #changes required
+                    sonarqube_analysis("Sonar","EkoMart","EkoMart")           
                 }
             }
         }
@@ -97,11 +97,11 @@ pipeline {
             steps{
                 script{
                         dir('backend'){
-                            docker_build("ecommerce-backend","${params.BACKEND_DOCKER_TAG}","irfan8194")
+                            docker_build("ecommerce-backend-beta","${params.BACKEND_DOCKER_TAG}","irfan8194")
                         }
                     
                         dir('frontend'){
-                            docker_build("ecommerce-frontend","${params.FRONTEND_DOCKER_TAG}","irfan8194")
+                            docker_build("ecommerce-frontend-beta","${params.FRONTEND_DOCKER_TAG}","irfan8194")
                         }
                 }
             }
@@ -110,8 +110,8 @@ pipeline {
         stage("Docker: Push to DockerHub"){
             steps{
                 script{
-                    docker_push("ecommerce-backend","${params.BACKEND_DOCKER_TAG}","irfan8194") 
-                    docker_push("ecommerce-frontend","${params.FRONTEND_DOCKER_TAG}","irfan8194")
+                    docker_push("ecommerce-backend-beta","${params.BACKEND_DOCKER_TAG}","irfan8194") 
+                    docker_push("ecommerce-frontend-beta","${params.FRONTEND_DOCKER_TAG}","irfan8194")
                 }
             }
         }

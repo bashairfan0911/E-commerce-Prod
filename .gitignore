@@ -70,3 +70,11 @@ pnpm-lock.yaml
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/terra-automate-key
+terraform/terra-automate-key.pub
+terraform.tfstate
