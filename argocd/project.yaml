@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: ekomart
+  namespace: argocd
+spec:
+  description: EkoMart E-Commerce Application
+  
+  # Allow manifests from the repository
+  sourceRepos:
+    - '*'
+  
+  # Allow deployment to ekomart namespace
+  destinations:
+    - namespace: ekomart
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  
+  # Allow all cluster-scoped resources
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  # Allow all namespace-scoped resources
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

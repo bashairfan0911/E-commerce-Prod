@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ekomart-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  ekomart-dashboard.json: |
+    {
+      "dashboard": {
+        "title": "EkoMart Application Dashboard",
+        "tags": ["ekomart", "application"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "title": "Backend Pod Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(kube_pod_status_phase{namespace=\"ekomart\",pod=~\"backend.*\",phase=\"Running\"})"
+              }
+            ],
+            "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "title": "Frontend Pod Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(kube_pod_status_phase{namespace=\"ekomart\",pod=~\"frontend.*\",phase=\"Running\"})"
+              }
+            ],
+            "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+          },
+          {
+            "title": "Backend CPU Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"ekomart\",pod=~\"backend.*\"}[5m])) by (pod)"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+          },
+          {
+            "title": "Backend Memory Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(container_memory_usage_bytes{namespace=\"ekomart\",pod=~\"backend.*\"}) by (pod)"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
+          },
+          {
+            "title": "Frontend CPU Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"ekomart\",pod=~\"frontend.*\"}[5m])) by (pod)"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12}
+          },
+          {
+            "title": "Frontend Memory Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(container_memory_usage_bytes{namespace=\"ekomart\",pod=~\"frontend.*\"}) by (pod)"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12}
+          },
+          {
+            "title": "Pod Restart Count",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(kube_pod_container_status_restarts_total{namespace=\"ekomart\"}) by (pod)"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 20}
+          }
+        ]
+      }
+    }

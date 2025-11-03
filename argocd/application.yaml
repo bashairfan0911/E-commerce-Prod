@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ekomart-app
+  namespace: argocd
+spec:
+  project: ekomart
+  
+  source:
+    repoURL: https://github.com/bashairfan0911/E-commerce-Prod.git
+    targetRevision: test-dev
+    path: kubernetes/Kind-cluster
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ekomart
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

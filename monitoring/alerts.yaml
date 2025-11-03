@@ -1,0 +1,72 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ekomart-alerts
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: ekomart.rules
+      interval: 30s
+      rules:
+        # Pod down alert
+        - alert: EkoMartPodDown
+          expr: kube_pod_status_phase{namespace="ekomart",phase!="Running"} == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "EkoMart pod is down"
+            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not running"
+        
+        # High CPU usage
+        - alert: EkoMartHighCPU
+          expr: sum(rate(container_cpu_usage_seconds_total{namespace="ekomart"}[5m])) by (pod) > 0.8
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage detected"
+            description: "Pod {{ $labels.pod }} CPU usage is above 80%"
+        
+        # High memory usage
+        - alert: EkoMartHighMemory
+          expr: sum(container_memory_usage_bytes{namespace="ekomart"}) by (pod) / sum(container_spec_memory_limit_bytes{namespace="ekomart"}) by (pod) > 0.9
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High memory usage detected"
+            description: "Pod {{ $labels.pod }} memory usage is above 90%"
+        
+        # Pod restart alert
+        - alert: EkoMartPodRestarting
+          expr: rate(kube_pod_container_status_restarts_total{namespace="ekomart"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod is restarting frequently"
+            description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes"
+        
+        # Backend unavailable
+        - alert: EkoMartBackendUnavailable
+          expr: absent(up{job="backend-metrics"}) == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Backend service is unavailable"
+            description: "Backend service metrics are not available"
+        
+        # Frontend unavailable
+        - alert: EkoMartFrontendUnavailable
+          expr: absent(up{job="frontend-metrics"}) == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Frontend service is unavailable"
+            description: "Frontend service metrics are not available"
