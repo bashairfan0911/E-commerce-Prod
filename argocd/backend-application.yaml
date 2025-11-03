@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ekomart-backend
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/bashairfan0911/E-commerce-Prod.git
+    targetRevision: EKS-Prod-Dev
+    path: kubernetes
+    directory:
+      include: '{namespace.yaml,configmap.yaml,secret.yaml,pvc.yaml,backend-*.yaml}'
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ekomart
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

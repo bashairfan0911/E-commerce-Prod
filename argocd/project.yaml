@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: ekomart-project
+  namespace: argocd
+spec:
+  description: EkoMart E-commerce Application Project
+  
+  sourceRepos:
+    - https://github.com/bashairfan0911/E-commerce-Prod.git
+  
+  destinations:
+    - namespace: ekomart
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+    - group: ''
+      kind: PersistentVolume
+  
+  namespaceResourceWhitelist:
+    - group: ''
+      kind: '*'
+    - group: 'apps'
+      kind: '*'
+    - group: 'batch'
+      kind: '*'
+    - group: 'networking.k8s.io'
+      kind: '*'
+  
+  orphanedResources:
+    warn: true
