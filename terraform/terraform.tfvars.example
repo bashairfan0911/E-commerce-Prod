@@ -1,0 +1,21 @@
+# AWS Configuration
+aws_region  = "us-east-1"
+environment = "production"
+
+# EC2 Instance Configuration
+instance_type = "t3.medium"  # 2 vCPU, 4 GB RAM
+instance_name = "ekomart-k8s-server"
+key_name      = "ekomart-key"  # Change to your SSH key name
+
+# Storage
+root_volume_size = 30  # GB
+
+# Security - IMPORTANT: Change these to your IP for security
+allowed_ssh_cidr        = "0.0.0.0/0"  # Change to YOUR_IP/32
+allowed_management_cidr = "0.0.0.0/0"  # Change to YOUR_IP/32
+
+# Elastic IP
+create_elastic_ip = true
+
+# Monitoring
+enable_monitoring = true
