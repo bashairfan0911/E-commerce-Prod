@@ -33,31 +33,38 @@ For experienced users, here's the fastest way to deploy:
 
 ```bash
 # From project root directory
-kind create cluster --name ecommerce --config kubernetes/Kind-cluster/kind-config.yaml
+kind create cluster --config kubernetes/Kind-cluster/kind-config.yaml
+
+# Install nginx ingress controller
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
+
+# Build and load images
 docker build -t ecommerce-backend:latest ./backend
-docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
-kind load docker-image ecommerce-backend:latest --name ecommerce
-kind load docker-image ecommerce-frontend:latest --name ecommerce
+docker build --build-arg VITE_API_URL=/api -t ecommerce-frontend:latest ./frontend
+kind load docker-image ecommerce-backend:latest
+kind load docker-image ecommerce-frontend:latest
 
 # Deploy with MongoDB Atlas (Cloud - Recommended)
 kubectl create namespace ekomart
-kubectl config set-context --current --namespace=ekomart
 kubectl apply -f kubernetes/Kind-cluster/backend-atlas.yaml
 kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
+kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
 
 # OR deploy with local MongoDB + persistent storage
 kubectl apply -f kubernetes/Kind-cluster/mongodb-persistent.yaml
 kubectl apply -f kubernetes/Kind-cluster/backend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
+kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
 
 # Wait for pods and seed database (if using local MongoDB)
 kubectl wait --for=condition=ready pod -l app=backend --timeout=120s
 kubectl exec -n ekomart deployment/backend-deployment -- node seedData.js
 ```
 
-Then open http://localhost:31000 and press Ctrl+Shift+R
+Then open **http://localhost** (via Ingress) or http://localhost:31000 (NodePort)
 
-> 💡 **Tip**: Use the automated script instead: `.\kubernetes\Kind-cluster\scripts\deploy-to-kind.ps1`
+> 💡 **Tip**: Use the automated script instead: `.\kubernetes\Kind-cluster\scripts\deploy.cmd`
 
 ## Quick Start
 
@@ -71,23 +78,32 @@ This creates a cluster with port mappings (31000 for frontend, 31100 for backend
 
 **Note**: Run all commands from the project root directory.
 
-### Step 2: Build Docker Images
+### Step 2: Install Nginx Ingress Controller
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
+```
+
+This enables Ingress support for routing traffic to your services.
+
+### Step 3: Build Docker Images
 
 ```bash
 docker build -t ecommerce-backend:latest ./backend
-docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
+docker build --build-arg VITE_API_URL=/api -t ecommerce-frontend:latest ./frontend
 ```
 
-**Note**: The frontend is built with `VITE_API_URL=/` so nginx can proxy API requests correctly.
+**Note**: The frontend is built with `VITE_API_URL=/api` so it can communicate with the backend through the Ingress.
 
-### Step 3: Load Images into Kind
+### Step 4: Load Images into Kind
 
 ```bash
-kind load docker-image ecommerce-backend:latest --name ecommerce
-kind load docker-image ecommerce-frontend:latest --name ecommerce
+kind load docker-image ecommerce-backend:latest
+kind load docker-image ecommerce-frontend:latest
 ```
 
-### Step 4: Deploy to Kubernetes
+### Step 5: Deploy to Kubernetes
 
 **Create namespace:**
 ```bash
@@ -101,6 +117,7 @@ kubectl config set-context --current --namespace=ekomart
 ```bash
 kubectl apply -f kubernetes/Kind-cluster/backend-atlas.yaml
 kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
+kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
 ```
 
 **Option B: With Local MongoDB + Persistent Storage**
@@ -108,6 +125,7 @@ kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/mongodb-persistent.yaml
 kubectl apply -f kubernetes/Kind-cluster/backend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
+kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
 ```
 
 **Option C: With Local MongoDB (Temporary)**
@@ -115,6 +133,7 @@ kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/mongodb-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/backend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
+kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
 ```
 
 **Note**: 
@@ -124,22 +143,16 @@ kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
 
 **Or use the automated deployment script:**
 
-**PowerShell (Windows):**
-```powershell
-.\kubernetes\Kind-cluster\scripts\deploy-to-kind.ps1
+**Windows:**
+```cmd
+kubernetes\Kind-cluster\scripts\deploy.cmd
 ```
 
-**Bash (Linux/Mac):**
-```bash
-chmod +x kubernetes/Kind-cluster/scripts/deploy-to-kind.sh
-./kubernetes/Kind-cluster/scripts/deploy-to-kind.sh
-```
-
-**Note**: The deployment script automatically handles namespace creation, deployment, database connection verification, and seeding.
+**Note**: The deployment script automatically handles cluster creation, ingress setup, image building, and deployment.
 
 > 📁 **All helper scripts are in** `kubernetes/Kind-cluster/scripts/` - See [scripts/README.md](scripts/README.md) for details.
 
-### Step 5: Wait for Pods to be Ready
+### Step 6: Wait for Pods to be Ready
 
 ```bash
 kubectl get pods -n ekomart -w
@@ -147,7 +160,7 @@ kubectl get pods -n ekomart -w
 
 Wait until all pods show `1/1 Running`.
 
-### Step 6: Seed the Database
+### Step 7: Seed the Database
 
 Populate the database with sample products and categories:
 
@@ -159,14 +172,19 @@ This will add:
 - 6 product categories
 - 21 sample products
 
-**Note**: If using the automated deployment script (`deploy-to-kind.ps1`), this step is done automatically.
+**Note**: If using the automated deployment script (`deploy.cmd`), this step is done automatically.
 
-### Step 7: Access Your Application
+### Step 8: Access Your Application
 
+**Recommended (via Ingress):**
+- **Frontend**: http://localhost
+- **Backend API**: http://localhost/api
+
+**Alternative (via NodePort):**
 - **Frontend**: http://localhost:31000
 - **Backend API**: http://localhost:31100
 
-**Important**: After accessing the application for the first time, do a **hard refresh** (Ctrl+Shift+R or Ctrl+F5) to ensure the latest JavaScript is loaded.
+**Important**: The Ingress setup at http://localhost is the recommended way to access the application as it properly routes API calls from the frontend to the backend.
 
 ## Verify Deployment
 
@@ -188,6 +206,11 @@ Check services:
 kubectl get svc -n ekomart
 ```
 
+Check ingress:
+```bash
+kubectl get ingress -n ekomart
+```
+
 View backend logs:
 ```bash
 kubectl logs -l app=backend -n ekomart
@@ -201,15 +224,14 @@ Server is running on port 5000
 
 ## Using the Application
 
-1. Open http://localhost:31000 in your browser
-2. **Do a hard refresh** (Ctrl+Shift+R or Ctrl+F5) to clear cached JavaScript
-3. Click "Sign Up" to create a new account
-4. Login with your credentials
-5. Browse products and add items to cart
-6. Proceed to checkout
+1. Open **http://localhost** in your browser (or http://localhost:31000 for NodePort)
+2. Click "Sign Up" to create a new account
+3. Login with your credentials
+4. Browse products and add items to cart
+5. Proceed to checkout
 
 **Important Notes**:
-- If you see errors like "ERR_CONNECTION_REFUSED" or requests going to `localhost:5000`, do a hard refresh
+- Use http://localhost (Ingress) for the best experience
 - **User accounts are lost on pod restart** unless you use persistent storage (see below)
 - Products are seeded automatically but you need to create your account each time
 
@@ -255,14 +277,18 @@ kubectl get pvc -n ekomart
 
 ## Troubleshooting
 
-### Frontend trying to connect to localhost:5000?
-This means the browser has cached old JavaScript. Solutions:
-1. **Hard refresh**: Press Ctrl+Shift+R or Ctrl+F5
-2. **Clear browser cache**: Open DevTools (F12) → Network tab → Check "Disable cache"
-3. **Rebuild frontend** if hard refresh doesn't work:
+### Frontend can't connect to backend?
+Make sure you're using the Ingress URL (http://localhost) instead of NodePort. If issues persist:
 ```bash
-docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
-kind load docker-image ecommerce-frontend:latest --name ecommerce
+# Check ingress is running
+kubectl get ingress -n ekomart
+
+# Verify ingress controller is ready
+kubectl get pods -n ingress-nginx
+
+# Rebuild frontend if needed
+docker build --build-arg VITE_API_URL=/api -t ecommerce-frontend:latest ./frontend
+kind load docker-image ecommerce-frontend:latest
 kubectl rollout restart deployment/frontend-deployment -n ekomart
 ```
 
@@ -281,10 +307,16 @@ kubectl logs -l app=backend -n ekomart
 ```
 
 ### Frontend showing 404 errors on /api/ endpoints?
-Rebuild frontend with correct API URL:
+Check that the Ingress is properly configured:
 ```bash
-docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
-kind load docker-image ecommerce-frontend:latest --name ecommerce
+kubectl describe ingress ekomart-ingress -n ekomart
+
+# If ingress is missing, apply it
+kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
+
+# Rebuild frontend with correct API URL if needed
+docker build --build-arg VITE_API_URL=/api -t ecommerce-frontend:latest ./frontend
+kind load docker-image ecommerce-frontend:latest
 kubectl rollout restart deployment/frontend-deployment -n ekomart
 ```
 
@@ -310,14 +342,14 @@ After making code changes:
 **Backend:**
 ```bash
 docker build -t ecommerce-backend:latest ./backend
-kind load docker-image ecommerce-backend:latest --name ecommerce
+kind load docker-image ecommerce-backend:latest
 kubectl rollout restart deployment/backend-deployment -n ekomart
 ```
 
 **Frontend:**
 ```bash
-docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
-kind load docker-image ecommerce-frontend:latest --name ecommerce
+docker build --build-arg VITE_API_URL=/api -t ecommerce-frontend:latest ./frontend
+kind load docker-image ecommerce-frontend:latest
 kubectl rollout restart deployment/frontend-deployment -n ekomart
 ```
 
@@ -409,10 +441,14 @@ Your user accounts and all data will be restored!
 ## Architecture Notes
 
 ### Networking
-- Frontend runs on port 80 inside the container, exposed via NodePort 31000
-- Backend runs on port 5000 inside the container, exposed via NodePort 31100
+- **Ingress** (Recommended): Routes traffic at http://localhost
+  - `/` → Frontend service (port 80)
+  - `/api` → Backend service (port 5000)
+- **NodePort** (Alternative):
+  - Frontend: http://localhost:31000
+  - Backend: http://localhost:31100
 - MongoDB runs on port 27017 (ClusterIP, internal only)
-- Nginx in frontend proxies `/api/` requests to `backend-service:5000/api/`
+- Frontend nginx config proxies `/api/` to `backend-service.ekomart.svc.cluster.local:5000/`
 
 ### Storage
 - **Recommended**: Use `mongodb-persistent.yaml` for persistent storage (keeps data across pod restarts)
@@ -433,14 +469,15 @@ Backend deployment includes:
 
 ## Common Issues
 
-**Issue**: `ERR_CONNECTION_REFUSED` or requests going to `localhost:5000`
+**Issue**: `ERR_CONNECTION_REFUSED` or API calls failing
 **Solution**: 
-1. Do a hard refresh (Ctrl+Shift+R) to clear browser cache
-2. Verify frontend was built with `VITE_API_URL=/`
-3. Check all pods are running: `kubectl get pods -n ekomart`
+1. Use http://localhost (Ingress) instead of http://localhost:31000 (NodePort)
+2. Verify ingress is running: `kubectl get ingress -n ekomart`
+3. Check ingress controller: `kubectl get pods -n ingress-nginx`
+4. Verify frontend was built with `VITE_API_URL=/api`
 
 **Issue**: Double `/api/api` in URLs
-**Solution**: Frontend must be built with `VITE_API_URL=/` (not `/api/` or `/api`)
+**Solution**: Frontend must be built with `VITE_API_URL=/api` and nginx should proxy to `backend-service:5000/` (not `/api/`)
 
 **Issue**: 400 Bad Request on login
 **Solution**: Create an account first using the Sign Up form
@@ -461,7 +498,7 @@ kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
 ```
 
 **Issue**: Changes not reflecting in browser
-**Solution**: Always do a hard refresh (Ctrl+Shift+R) after updating deployments
+**Solution**: Clear browser cache or open in incognito mode after updating deployments
 
 **Issue**: Username/password wrong after redeploying
 **Solution**: If using temporary storage (`mongodb-kind.yaml`), data is lost on restart. Solutions:
