@@ -47,7 +47,7 @@ kind load docker-image ecommerce-frontend:latest
 
 # Deploy with MongoDB Atlas (Cloud - Recommended)
 kubectl create namespace ekomart
-kubectl apply -f kubernetes/Kind-cluster/backend-atlas.yaml
+kubectl apply -f kubernetes/Kind-cluster/backend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
 
@@ -115,7 +115,7 @@ kubectl config set-context --current --namespace=ekomart
 
 **Option A: With MongoDB Atlas (Cloud - Recommended)**
 ```bash
-kubectl apply -f kubernetes/Kind-cluster/backend-atlas.yaml
+kubectl apply -f kubernetes/Kind-cluster/backend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
 ```
@@ -128,18 +128,9 @@ kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
 kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
 ```
 
-**Option C: With Local MongoDB (Temporary)**
-```bash
-kubectl apply -f kubernetes/Kind-cluster/mongodb-kind.yaml
-kubectl apply -f kubernetes/Kind-cluster/backend-kind.yaml
-kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml
-kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
-```
-
 **Note**: 
-- Option A: Data persists in cloud, survives everything (cluster deletion, namespace deletion)
-- Option B: Data persists locally, survives pod restarts
-- Option C: Data lost on pod restart
+- Option A: Data persists in cloud (MongoDB Atlas), survives everything (cluster deletion, namespace deletion). Backend is configured to use Atlas by default.
+- Option B: Data persists locally, survives pod restarts but not cluster deletion
 
 **Or use the automated deployment script:**
 

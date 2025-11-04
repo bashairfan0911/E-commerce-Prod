@@ -10,6 +10,13 @@ spec:
     repoURL: https://github.com/bashairfan0911/E-commerce-Prod.git
     targetRevision: test-dev
     path: kubernetes/Kind-cluster
+    directory:
+      exclude: |
+        kind-config.yaml
+        backend-kind.yaml
+        mongodb-persistent.yaml
+        *.md
+        scripts/*
   
   destination:
     server: https://kubernetes.default.svc
