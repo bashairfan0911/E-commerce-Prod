@@ -41,6 +41,7 @@ jobs:
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
+          category: 'trivy-filesystem'
 
       - name: Run Trivy vulnerability scanner (table format)
         uses: aquasecurity/trivy-action@master
@@ -180,6 +181,7 @@ jobs:
         continue-on-error: true
         with:
           sarif_file: 'trivy-backend-image.sarif'
+          category: 'trivy-backend-image'
 
       - name: Extract metadata for frontend
         id: meta-frontend
@@ -219,6 +221,7 @@ jobs:
         continue-on-error: true
         with:
           sarif_file: 'trivy-frontend-image.sarif'
+          category: 'trivy-frontend-image'
 
       - name: Image digest
         run: |
