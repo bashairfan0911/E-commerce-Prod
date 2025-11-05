@@ -79,7 +79,6 @@ jobs:
   sonarqube-analysis:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
-    continue-on-error: true
     
     steps:
       - name: Checkout code
@@ -95,37 +94,30 @@ jobs:
       - name: Install backend dependencies
         working-directory: ./backend
         run: npm ci
-        continue-on-error: true
 
       - name: Install frontend dependencies
         working-directory: ./frontend
         run: npm ci
-        continue-on-error: true
 
       - name: Run backend tests with coverage
         working-directory: ./backend
-        run: npm test -- --coverage || true
-        continue-on-error: true
+        run: npm run test:ci || npm test
 
       - name: Run frontend tests with coverage
         working-directory: ./frontend
-        run: npm test -- --coverage || true
-        continue-on-error: true
+        run: npm run test:coverage || npm test
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        continue-on-error: true
 
       - name: SonarQube Quality Gate check
         uses: sonarsource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        continue-on-error: true
-        if: false  # Disabled - view results in SonarCloud dashboard instead
 
   build-and-push:
     name: Build and Push Docker Images

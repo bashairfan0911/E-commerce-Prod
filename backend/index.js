@@ -22,18 +22,19 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads', 'products');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log('✓ Created uploads/products directory');
 }
 
-// Serve static files from the uploads folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (req,res)=>{
-    res.send('Hello world')
+    return res.send('Hello world')
+})
+
+app.get('/health', (req,res)=>{
+    return res.status(200).json({ status: 'OK', message: 'Server is running' })
 })
 
 app.use("/api", productRoute)
@@ -47,6 +48,8 @@ app.use("/api", wishlistRoute)
 DBConn();
 
 const port = process.env.PORT || 3000
-app.listen(port,()=>{
+const server = app.listen(port,()=>{
     console.log(`Server is running on port ${port}`)
 })
+
+export default app;
