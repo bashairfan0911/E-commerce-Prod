@@ -13,8 +13,6 @@ spec:
     directory:
       exclude: |
         kind-config.yaml
-        backend-kind.yaml
-        mongodb-persistent.yaml
         *.md
         scripts/*
   
