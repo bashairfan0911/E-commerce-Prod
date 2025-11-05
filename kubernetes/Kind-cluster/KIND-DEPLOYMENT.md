@@ -41,7 +41,7 @@ kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.
 
 # Build and load images
 docker build -t ecommerce-backend:latest ./backend
-docker build --build-arg VITE_API_URL=/api -t ecommerce-frontend:latest ./frontend
+docker build --no-cache --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
 kind load docker-image ecommerce-backend:latest
 kind load docker-image ecommerce-frontend:latest
 
@@ -62,9 +62,24 @@ kubectl wait --for=condition=ready pod -l app=backend --timeout=120s
 kubectl exec -n ekomart deployment/backend-deployment -- node seedData.js
 ```
 
-Then open **http://localhost** (via Ingress) or http://localhost:31000 (NodePort)
+Then open **http://localhost** (Ingress required)
 
 > 💡 **Tip**: Use the automated script instead: `.\kubernetes\Kind-cluster\scripts\deploy.cmd`
+
+## Important: How Routing Works
+
+This deployment uses **Kubernetes Ingress** for routing:
+
+```
+Browser → http://localhost/ → Ingress Controller
+  ├─ / → Frontend Service (port 80) → Static files
+  └─ /api/* → Backend Service (port 5000) → API endpoints
+```
+
+**You MUST access via http://localhost** (not NodePort :31000) because:
+- Frontend makes requests to `/api/login`, `/api/products`, etc.
+- Ingress routes these to the backend service
+- NodePort bypasses ingress and won't work properly
 
 ## Quick Start
 
@@ -91,10 +106,14 @@ This enables Ingress support for routing traffic to your services.
 
 ```bash
 docker build -t ecommerce-backend:latest ./backend
-docker build --build-arg VITE_API_URL=/api -t ecommerce-frontend:latest ./frontend
+docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
 ```
 
-**Note**: The frontend is built with `VITE_API_URL=/api` so it can communicate with the backend through the Ingress.
+**Important Notes:**
+- Frontend uses `VITE_API_URL=/` because the app code already includes `/api` in requests (e.g., `/api/login`)
+- Frontend nginx serves only static files - no API proxying
+- Kubernetes Ingress handles routing `/api/*` to backend service
+- This setup requires accessing via **http://localhost** (Ingress), not NodePort
 
 ### Step 4: Load Images into Kind
 
@@ -278,7 +297,7 @@ kubectl get ingress -n ekomart
 kubectl get pods -n ingress-nginx
 
 # Rebuild frontend if needed
-docker build --build-arg VITE_API_URL=/api -t ecommerce-frontend:latest ./frontend
+docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
 kind load docker-image ecommerce-frontend:latest
 kubectl rollout restart deployment/frontend-deployment -n ekomart
 ```
@@ -306,7 +325,7 @@ kubectl describe ingress ekomart-ingress -n ekomart
 kubectl apply -f kubernetes/Kind-cluster/ingress-kind.yaml
 
 # Rebuild frontend with correct API URL if needed
-docker build --build-arg VITE_API_URL=/api -t ecommerce-frontend:latest ./frontend
+docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
 kind load docker-image ecommerce-frontend:latest
 kubectl rollout restart deployment/frontend-deployment -n ekomart
 ```
@@ -339,7 +358,7 @@ kubectl rollout restart deployment/backend-deployment -n ekomart
 
 **Frontend:**
 ```bash
-docker build --build-arg VITE_API_URL=/api -t ecommerce-frontend:latest ./frontend
+docker build --build-arg VITE_API_URL=/ -t ecommerce-frontend:latest ./frontend
 kind load docker-image ecommerce-frontend:latest
 kubectl rollout restart deployment/frontend-deployment -n ekomart
 ```
@@ -465,10 +484,10 @@ Backend deployment includes:
 1. Use http://localhost (Ingress) instead of http://localhost:31000 (NodePort)
 2. Verify ingress is running: `kubectl get ingress -n ekomart`
 3. Check ingress controller: `kubectl get pods -n ingress-nginx`
-4. Verify frontend was built with `VITE_API_URL=/api`
+4. Verify frontend was built with `VITE_API_URL=/` and nginx config uses `backend-service.ekomart.svc.cluster.local:5000`
 
 **Issue**: Double `/api/api` in URLs
-**Solution**: Frontend must be built with `VITE_API_URL=/api` and nginx should proxy to `backend-service:5000/` (not `/api/`)
+**Solution**: Frontend must be built with `VITE_API_URL=/` (not `/api`) because the frontend code already includes `/api` in all API calls. Nginx then proxies `/api/*` to `backend-service:5000/`
 
 **Issue**: 400 Bad Request on login
 **Solution**: Create an account first using the Sign Up form

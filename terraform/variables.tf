@@ -57,3 +57,21 @@ variable "enable_monitoring" {
   type        = bool
   default     = true
 }
+
+variable "ami_id" {
+  description = "AMI ID to use for EC2 instance (leave empty to use latest Ubuntu 22.04)"
+  type        = string
+  default     = ""
+}
+
+variable "ami_owner" {
+  description = "AMI owner ID (099720109477 for Canonical/Ubuntu, 137112412989 for Amazon)"
+  type        = string
+  default     = "099720109477"
+}
+
+variable "ami_name_filter" {
+  description = "AMI name filter pattern"
+  type        = string
+  default     = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
+}

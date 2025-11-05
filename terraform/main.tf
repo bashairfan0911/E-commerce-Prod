@@ -1,11 +1,11 @@
-# Data source for latest Ubuntu AMI
-data "aws_ami" "ubuntu" {
+# Data source for AMI (only used if ami_id is not specified)
+data "aws_ami" "selected" {
   most_recent = true
-  owners      = ["099720109477"] # Canonical
+  owners      = [var.ami_owner]
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+    values = [var.ami_name_filter]
   }
 
   filter {
@@ -125,7 +125,7 @@ resource "aws_security_group" "ekomart_sg" {
 
 # EC2 Instance
 resource "aws_instance" "ekomart_server" {
-  ami           = data.aws_ami.ubuntu.id
+  ami           = var.ami_id != "" ? var.ami_id : data.aws_ami.selected.id
   instance_type = var.instance_type
   key_name      = var.key_name
 

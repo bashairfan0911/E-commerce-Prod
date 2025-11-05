@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     container_name: ecommerce-backend
     ports:
-      - "8080:8080"
+      - "5001:8080"
     env_file:
       - ./backend/.env.docker
     volumes:
@@ -21,10 +21,10 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=/api
+        - VITE_API_URL=http://localhost:5001
     container_name: ecommerce-frontend
     ports:
-      - "5173:80"
+      - "8080:80"
     env_file:
       - ./frontend/.env.docker
     depends_on:

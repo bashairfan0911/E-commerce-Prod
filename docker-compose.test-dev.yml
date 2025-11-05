@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Backend Service - Test-Dev
+  backend:
+    image: ${DOCKER_USERNAME}/ekomart-backend:test-dev
+    container_name: ekomart-backend-test
+    ports:
+      - "5001:8080"
+    env_file:
+      - ./backend/.env.docker
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+    volumes:
+      - ./backend/uploads:/app/uploads
+    networks:
+      - ekomart-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Service - Test-Dev
+  frontend:
+    image: ${DOCKER_USERNAME}/ekomart-frontend:test-dev
+    container_name: ekomart-frontend-test
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - ekomart-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  ekomart-network:
+    driver: bridge
+
+volumes:
+  uploads:
