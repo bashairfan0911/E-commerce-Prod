@@ -125,6 +125,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         continue-on-error: true
+        if: false  # Disabled - view results in SonarCloud dashboard instead
 
   build-and-push:
     name: Build and Push Docker Images
