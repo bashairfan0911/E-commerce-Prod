@@ -223,78 +223,10 @@ jobs:
           echo "Frontend Image: ${{ secrets.DOCKER_USERNAME }}/ekomart-frontend"
           echo "Tags: ${{ steps.meta-backend.outputs.tags }}"
 
-  deploy-to-kubernetes:
-    name: Deploy to Kubernetes
-    runs-on: ubuntu-latest
-    needs: [build-and-push]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/test-dev'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure kubectl
-        uses: azure/k8s-set-context@v3
-        with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBE_CONFIG }}
-        continue-on-error: true
-
-      - name: Create namespace if not exists
-        run: |
-          kubectl create namespace ekomart --dry-run=client -o yaml | kubectl apply -f -
-        continue-on-error: true
-
-      - name: Create secrets
-        run: |
-          kubectl create secret generic backend-secrets \
-            --from-literal=mongodb-uri='${{ secrets.MONGODB_URI }}' \
-            --from-literal=jwt-secret='${{ secrets.JWT_SECRET_KEY }}' \
-            --from-literal=cloudinary-name='${{ secrets.CLOUD_NAME }}' \
-            --from-literal=cloudinary-key='${{ secrets.CLOUD_API_KEY }}' \
-            --from-literal=cloudinary-secret='${{ secrets.CLOUD_API_SECRET_KEY }}' \
-            --from-literal=razorpay-key-id='${{ secrets.KEY_ID }}' \
-            --from-literal=razorpay-key-secret='${{ secrets.KEY_SECRET }}' \
-            -n ekomart \
-            --dry-run=client -o yaml | kubectl apply -f -
-        continue-on-error: true
-
-      - name: Update image tags in manifests
-        run: |
-          cd kubernetes/production
-          sed -i "s|\${DOCKER_USERNAME}|${{ secrets.DOCKER_USERNAME }}|g" backend-deployment.yaml
-          sed -i "s|\${DOCKER_USERNAME}|${{ secrets.DOCKER_USERNAME }}|g" frontend-deployment.yaml
-
-      - name: Deploy to Kubernetes
-        run: |
-          kubectl apply -f kubernetes/production/namespace.yaml
-          kubectl apply -f kubernetes/production/backend-deployment.yaml
-          kubectl apply -f kubernetes/production/frontend-deployment.yaml
-          kubectl apply -f kubernetes/production/ingress.yaml
-        continue-on-error: true
-
-      - name: Wait for deployment
-        run: |
-          kubectl rollout status deployment/backend-deployment -n ekomart --timeout=5m
-          kubectl rollout status deployment/frontend-deployment -n ekomart --timeout=5m
-        continue-on-error: true
-
-      - name: Get deployment status
-        run: |
-          echo "=== Deployments ==="
-          kubectl get deployments -n ekomart
-          echo ""
-          echo "=== Pods ==="
-          kubectl get pods -n ekomart
-          echo ""
-          echo "=== Services ==="
-          kubectl get services -n ekomart
-        continue-on-error: true
-
   notify:
     name: Notification
     runs-on: ubuntu-latest
-    needs: [build-and-push, deploy-to-kubernetes]
+    needs: [build-and-push]
     if: always()
     
     steps:
@@ -302,4 +234,14 @@ jobs:
         run: |
           echo "Pipeline completed!"
           echo "Build Status: ${{ needs.build-and-push.result }}"
-          echo "Deploy Status: ${{ needs.deploy-to-kubernetes.result }}"
+          echo ""
+          echo "Docker images pushed to Docker Hub:"
+          echo "  - ${{ secrets.DOCKER_USERNAME }}/ekomart-backend:test-dev"
+          echo "  - ${{ secrets.DOCKER_USERNAME }}/ekomart-frontend:test-dev"
+          echo ""
+          echo "To deploy locally:"
+          echo "  docker-compose -f docker-compose.test-dev.yml up -d"
+          echo ""
+          echo "To deploy to Kind cluster:"
+          echo "  kubectl apply -f kubernetes/Kind-cluster/backend-kind.yaml"
+          echo "  kubectl apply -f kubernetes/Kind-cluster/frontend-kind.yaml"
