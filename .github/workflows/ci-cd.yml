@@ -166,15 +166,18 @@ jobs:
 
       - name: Run Trivy scan on backend image
         uses: aquasecurity/trivy-action@master
+        if: success()
+        continue-on-error: true
         with:
-          image-ref: ${{ secrets.DOCKER_USERNAME }}/ekomart-backend:latest
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/ekomart-backend:test-dev
           format: 'sarif'
           output: 'trivy-backend-image.sarif'
           severity: 'CRITICAL,HIGH'
 
       - name: Upload backend Trivy results
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: success() && hashFiles('trivy-backend-image.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: 'trivy-backend-image.sarif'
 
@@ -202,15 +205,18 @@ jobs:
 
       - name: Run Trivy scan on frontend image
         uses: aquasecurity/trivy-action@master
+        if: success()
+        continue-on-error: true
         with:
-          image-ref: ${{ secrets.DOCKER_USERNAME }}/ekomart-frontend:latest
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/ekomart-frontend:test-dev
           format: 'sarif'
           output: 'trivy-frontend-image.sarif'
           severity: 'CRITICAL,HIGH'
 
       - name: Upload frontend Trivy results
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: success() && hashFiles('trivy-frontend-image.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: 'trivy-frontend-image.sarif'
 

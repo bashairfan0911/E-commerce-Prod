@@ -135,6 +135,12 @@ severity: 'CRITICAL,HIGH,MEDIUM,LOW'
 2. Review security scan results
 3. Fix issues and push again
 
+### Docker Push Fails: "insufficient scopes"
+**Solution**: Update Docker Hub token
+1. See [Docker Hub Setup Guide](DOCKER-HUB-SETUP.md)
+2. Create new token with "Read, Write, Delete" permissions
+3. Update `DOCKER_PASSWORD` secret in GitHub
+
 ### Can't Pull Images
 ```bash
 docker login
@@ -145,6 +151,11 @@ docker pull your-username/ekomart-backend:test-dev
 1. Go to Settings → Secrets and variables → Actions
 2. Verify all required secrets are added
 3. Check secret names match exactly
+
+### SonarQube Fails
+**Solution**: It's optional, pipeline will continue
+- See [SonarCloud Setup Guide](SONARCLOUD-SETUP.md) to fix
+- Or ignore it - Docker builds will still work
 
 ## 📚 Documentation
 
