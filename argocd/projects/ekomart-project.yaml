@@ -1,0 +1,71 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: ekomart
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: EkoMart E-Commerce Platform
+  
+  # Source repositories
+  sourceRepos:
+    - https://github.com/bashairfan0911/E-commerce-Prod.git
+    - '*'
+  
+  # Destination clusters and namespaces
+  destinations:
+    - namespace: ekomart
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  
+  # Cluster resource whitelist
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  
+  # Namespace resource whitelist
+  namespaceResourceWhitelist:
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: PersistentVolumeClaim
+    - group: apps
+      kind: Deployment
+    - group: apps
+      kind: StatefulSet
+    - group: apps
+      kind: ReplicaSet
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: networking.k8s.io
+      kind: NetworkPolicy
+  
+  # Roles for RBAC
+  roles:
+    - name: read-only
+      description: Read-only access to ekomart applications
+      policies:
+        - p, proj:ekomart:read-only, applications, get, ekomart/*, allow
+      groups:
+        - ekomart-viewers
+    
+    - name: developer
+      description: Developer access to ekomart applications
+      policies:
+        - p, proj:ekomart:developer, applications, get, ekomart/*, allow
+        - p, proj:ekomart:developer, applications, sync, ekomart/*, allow
+      groups:
+        - ekomart-developers
+    
+    - name: admin
+      description: Admin access to ekomart applications
+      policies:
+        - p, proj:ekomart:admin, applications, *, ekomart/*, allow
+      groups:
+        - ekomart-admins

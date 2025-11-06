@@ -1,25 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ekomart-app
+  name: ekomart-backend
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: ekomart-backend
+    app.kubernetes.io/instance: ekomart
+    app.kubernetes.io/component: backend
 spec:
-  project: ekomart
-  
+  project: default
   source:
     repoURL: https://github.com/bashairfan0911/E-commerce-Prod.git
     targetRevision: test-dev
     path: kubernetes/Kind-cluster
     directory:
-      exclude: |
-        kind-config.yaml
-        *.md
-        scripts/*
-  
+      include: backend-kind.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: ekomart
-  
   syncPolicy:
     automated:
       prune: true
@@ -35,3 +35,9 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 3m
+  revisionHistoryLimit: 10
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

@@ -1,16 +1,14 @@
-# ArgoCD Configuration for EkoMart
+# ArgoCD GitOps Setup for EkoMart
 
-This directory contains ArgoCD configuration files for GitOps deployment of the EkoMart application.
+This directory contains ArgoCD application manifests for deploying the EkoMart e-commerce platform using GitOps principles.
 
-## Files
+## Prerequisites
 
-- `install.yaml` - Installation instructions for ArgoCD
-- `project.yaml` - ArgoCD project definition
-- `application.yaml` - Main application configuration
-- `backend-application.yaml` - Backend-specific application
-- `frontend-application.yaml` - Frontend-specific application
+- Kubernetes cluster (Kind, EKS, GKE, etc.)
+- kubectl configured
+- ArgoCD installed in the cluster
 
-## Quick Setup
+## Quick Start
 
 ### 1. Install ArgoCD
 
@@ -27,117 +25,169 @@ kubectl wait --for=condition=ready pod --all -n argocd --timeout=300s
 
 ### 2. Access ArgoCD UI
 
-For Kind cluster:
 ```bash
-# Port forward to access UI
+# Port forward (for local access)
 kubectl port-forward svc/argocd-server -n argocd 8080:443
-```
 
-For production (NodePort):
-```bash
-# Change service type to NodePort
+# Or patch to NodePort (for EC2/remote access)
 kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
 
-# Get the NodePort
-kubectl get svc argocd-server -n argocd
-```
-
-### 3. Get Admin Password
-
-```bash
+# Get admin password
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 ```
 
-- **Username**: `admin`
-- **Password**: (output from above command)
+Access at: https://localhost:8080 (Username: `admin`)
 
-Access at: https://localhost:8080
+### 3. Deploy Applications with ArgoCD
 
-### 4. Deploy Applications
+#### Option A: Deploy All Applications at Once
 
 ```bash
-# Create ArgoCD project
-kubectl apply -f argocd/project.yaml
-
-# Deploy all applications
-kubectl apply -f argocd/application.yaml
-
-# Or deploy backend and frontend separately
-kubectl apply -f argocd/backend-application.yaml
-kubectl apply -f argocd/frontend-application.yaml
+# Deploy the app-of-apps pattern
+kubectl apply -f argocd/app-of-apps.yaml
 ```
 
-## ArgoCD CLI Commands
-
-### Install ArgoCD CLI
+#### Option B: Deploy Individual Applications
 
 ```bash
-# Linux
+# Deploy namespace
+kubectl apply -f argocd/namespace.yaml
+
+# Deploy backend
+kubectl apply -f argocd/applications/backend-app.yaml
+
+# Deploy frontend
+kubectl apply -f argocd/applications/frontend-app.yaml
+```
+
+### 4. Verify Deployments
+
+```bash
+# Check ArgoCD applications
+kubectl get applications -n argocd
+
+# Check application status
+argocd app list
+
+# Check pods in ekomart namespace
+kubectl get pods -n ekomart
+
+# Check services
+kubectl get svc -n ekomart
+```
+
+## ArgoCD CLI Setup
+
+```bash
+# Install ArgoCD CLI (Linux)
 curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
 sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
 rm argocd-linux-amd64
 
-# macOS
-brew install argocd
+# Login to ArgoCD
+argocd login localhost:8080 --username admin --password <password>
 
-# Windows
-choco install argocd-cli
+# Or for remote server
+argocd login <ARGOCD_SERVER> --username admin --password <password>
 ```
 
-### Login via CLI
+## Application Structure
+
+```
+argocd/
+├── README.md                          # This file
+├── namespace.yaml                     # Namespace configuration
+├── app-of-apps.yaml                   # App of Apps pattern
+├── applications/
+│   ├── backend-app.yaml              # Backend application
+│   └── frontend-app.yaml             # Frontend application
+└── projects/
+    └── ekomart-project.yaml          # ArgoCD project definition
+```
+
+## Configuration
+
+### Update Git Repository
+
+Edit the application manifests to point to your Git repository:
+
+```yaml
+spec:
+  source:
+    repoURL: https://github.com/YOUR_USERNAME/YOUR_REPO.git
+    targetRevision: test-dev
+```
+
+### Sync Policies
+
+Applications are configured with:
+- **Auto-sync**: Automatically sync when changes are detected
+- **Self-heal**: Automatically correct drift from desired state
+- **Prune**: Remove resources that are no longer defined
+
+To disable auto-sync, remove the `automated` section from the application manifest.
+
+## Managing Applications
+
+### Sync Application
 
 ```bash
-# Port forward first
-kubectl port-forward svc/argocd-server -n argocd 8080:443
+# Sync specific app
+argocd app sync ekomart-backend
 
-# Login
-argocd login localhost:8080 --username admin --insecure
+# Sync all apps
+argocd app sync -l app.kubernetes.io/instance=ekomart
 ```
 
-### Manage Applications
+### View Application Details
 
 ```bash
-# List applications
-argocd app list
+# Get app info
+argocd app get ekomart-backend
 
-# Get application details
-argocd app get ekomart-app
+# View app logs
+argocd app logs ekomart-backend
 
-# Sync application
-argocd app sync ekomart-app
-
-# View application logs
-argocd app logs ekomart-app
-
-# Delete application
-argocd app delete ekomart-app
+# View app history
+argocd app history ekomart-backend
 ```
 
-## Configuration Details
+### Rollback Application
 
-### Project Configuration
+```bash
+# Rollback to previous version
+argocd app rollback ekomart-backend
 
-The `project.yaml` defines:
-- Project name: `ekomart`
-- Allowed source repositories: All (`*`)
-- Allowed destinations: `ekomart` namespace
-- Resource permissions: All cluster and namespace resources
+# Rollback to specific revision
+argocd app rollback ekomart-backend 5
+```
 
-### Application Configuration
+### Delete Application
 
-The `application.yaml` defines:
-- Source: GitHub repository (test-dev branch)
-- Path: `kubernetes/Kind-cluster`
-- Destination: `ekomart` namespace
-- Sync policy: Automated with self-healing
-- Auto-create namespace
+```bash
+# Delete app (keeps resources)
+argocd app delete ekomart-backend
 
-### Sync Policy
+# Delete app and resources
+argocd app delete ekomart-backend --cascade
+```
 
-All applications use automated sync with:
-- **Prune**: Remove resources not in Git
-- **Self-heal**: Automatically sync when cluster state differs from Git
-- **Retry**: Automatic retry on sync failures
+## Monitoring
+
+### Application Health
+
+ArgoCD automatically monitors:
+- Deployment status
+- Pod health
+- Service availability
+- Resource sync status
+
+### Notifications
+
+Configure notifications in ArgoCD to get alerts on:
+- Sync failures
+- Health degradation
+- Out-of-sync resources
 
 ## Troubleshooting
 
@@ -145,41 +195,68 @@ All applications use automated sync with:
 
 ```bash
 # Check application status
-argocd app get ekomart-app
+argocd app get ekomart-backend
 
-# View sync status
-kubectl get application ekomart-app -n argocd -o yaml
+# View sync errors
+kubectl describe application ekomart-backend -n argocd
 
-# Manual sync
-argocd app sync ekomart-app --force
+# Force refresh
+argocd app get ekomart-backend --refresh
 ```
 
-### View Application Events
+### Image Pull Errors
+
+If using private Docker registry:
 
 ```bash
-kubectl describe application ekomart-app -n argocd
+# Create docker registry secret
+kubectl create secret docker-registry regcred \
+  --docker-server=docker.io \
+  --docker-username=<username> \
+  --docker-password=<password> \
+  -n ekomart
+
+# Update deployment to use imagePullSecrets
 ```
 
-### Reset Admin Password
+### Access Application
 
-```bash
-# Delete the secret
-kubectl -n argocd delete secret argocd-initial-admin-secret
-
-# Restart ArgoCD server
-kubectl -n argocd rollout restart deployment argocd-server
-```
+- **Frontend**: http://\<NODE_IP\>:31000
+- **Backend**: http://\<NODE_IP\>:31100
 
 ## Best Practices
 
-1. **Use separate applications** for backend and frontend for independent deployments
-2. **Enable auto-sync** for continuous deployment
-3. **Use self-heal** to maintain desired state
-4. **Set retry limits** to handle transient failures
-5. **Monitor sync status** regularly
+1. **Use Git as Single Source of Truth**: All changes should go through Git
+2. **Enable Auto-Sync with Caution**: Test in dev before enabling in production
+3. **Use Projects**: Organize applications using ArgoCD projects
+4. **Implement RBAC**: Control access to applications and resources
+5. **Monitor Sync Status**: Set up alerts for sync failures
+6. **Use Helm/Kustomize**: For complex configurations
+7. **Tag Images Properly**: Avoid using `latest` tag in production
+
+## Integration with CI/CD
+
+Your GitHub Actions workflow builds and pushes images. ArgoCD will:
+1. Detect changes in Kubernetes manifests
+2. Automatically sync the changes to the cluster
+3. Update deployments with new image tags
+
+To update image tags automatically, consider using:
+- ArgoCD Image Updater
+- Kustomize with image transformers
+- Helm values files
+
+## Security
+
+- Store secrets in Kubernetes Secrets or external secret managers
+- Use RBAC to control access
+- Enable audit logging
+- Regularly update ArgoCD
+- Use private Git repositories
+- Implement network policies
 
 ## Additional Resources
 
 - [ArgoCD Documentation](https://argo-cd.readthedocs.io/)
 - [ArgoCD Best Practices](https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/)
-- [GitOps Principles](https://www.gitops.tech/)
+- [GitOps Principles](https://opengitops.dev/)

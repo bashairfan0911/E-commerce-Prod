@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ekomart-backend
+  namespace: argocd
+  annotations:
+    # Enable image updater
+    argocd-image-updater.argoproj.io/image-list: backend=bashairfan0911/ekomart-backend:test-dev
+    
+    # Update strategy: latest tag matching pattern
+    argocd-image-updater.argoproj.io/backend.update-strategy: latest
+    
+    # Allow tags matching this pattern
+    argocd-image-updater.argoproj.io/backend.allow-tags: regexp:^test-dev-.*$
+    
+    # Force update even if tag is same
+    argocd-image-updater.argoproj.io/backend.force-update: "true"
+    
+    # Write back method: git or argocd
+    argocd-image-updater.argoproj.io/write-back-method: argocd
+    
+    # Pull secret for private registry (if needed)
+    # argocd-image-updater.argoproj.io/backend.pull-secret: secret:argocd/docker-config
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: ekomart-backend
+    app.kubernetes.io/instance: ekomart
+    app.kubernetes.io/component: backend
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/bashairfan0911/E-commerce-Prod.git
+    targetRevision: test-dev
+    path: kubernetes/Kind-cluster
+    directory:
+      include: backend-kind.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ekomart
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

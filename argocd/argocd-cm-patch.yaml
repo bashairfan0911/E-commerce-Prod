@@ -1,0 +1,51 @@
+# ArgoCD ConfigMap Patch
+# Apply with: kubectl patch configmap argocd-cm -n argocd --patch-file argocd-cm-patch.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+data:
+  # Enable anonymous access (read-only)
+  # users.anonymous.enabled: "true"
+  
+  # Timeout settings
+  timeout.reconciliation: 180s
+  timeout.hard.reconciliation: 0s
+  
+  # Repository credentials template
+  repository.credentials: |
+    - url: https://github.com/bashairfan0911
+      passwordSecret:
+        name: github-secret
+        key: password
+      usernameSecret:
+        name: github-secret
+        key: username
+  
+  # Resource customizations
+  resource.customizations: |
+    networking.k8s.io/Ingress:
+      health.lua: |
+        hs = {}
+        hs.status = "Healthy"
+        return hs
+  
+  # Application instance label key
+  application.instanceLabelKey: argocd.argoproj.io/instance
+  
+  # Enable status badge
+  statusbadge.enabled: "true"
+  
+  # Dex configuration (optional - for SSO)
+  # dex.config: |
+  #   connectors:
+  #     - type: github
+  #       id: github
+  #       name: GitHub
+  #       config:
+  #         clientID: $GITHUB_CLIENT_ID
+  #         clientSecret: $GITHUB_CLIENT_SECRET
+  #         orgs:
+  #         - name: your-org

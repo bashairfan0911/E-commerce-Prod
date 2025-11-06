@@ -101,6 +101,15 @@ kubectl get svc -n ekomart
 - **Backend API**: http://localhost:31100
 
 #### Step 10: Install ArgoCD (Optional)
+
+**Quick Installation:**
+```bash
+# Run automated installation script
+chmod +x argocd/install-argocd.sh
+./argocd/install-argocd.sh
+```
+
+**Manual Installation:**
 ```bash
 # Create namespace
 kubectl create namespace argocd
@@ -119,6 +128,18 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 ```
 
 Access ArgoCD at: https://localhost:8080 (Username: admin)
+
+**Deploy Applications with ArgoCD:**
+```bash
+# Deploy using App of Apps pattern
+kubectl apply -f argocd/app-of-apps.yaml
+
+# Or deploy individually
+kubectl apply -f argocd/applications/backend-app.yaml
+kubectl apply -f argocd/applications/frontend-app.yaml
+```
+
+**📁 [Complete ArgoCD Setup Guide](argocd/README.md)** | **📁 [Quick Start](argocd/QUICKSTART.md)**
 
 #### Step 11: Install Monitoring (Optional)
 ```bash
