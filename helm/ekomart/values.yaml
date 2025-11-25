@@ -1,0 +1,84 @@
+# Default values for ekomart
+namespace: ekomart
+
+# Backend configuration
+backend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: irfan8194/ecommerce-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: LoadBalancer
+    port: 5000
+    targetPort: 5000
+  
+  env:
+    nodeEnv: production
+    port: "5000"
+    # MongoDB connection string
+    dbUri: "mongodb+srv://bashairfan518:Irfan86101@cluster0.hwcnddm.mongodb.net/ekomart?retryWrites=true&w=majority"
+    jwtSecretKey: "TN3TY7aH4qVFwRgJHvlsmaATH8RrrTBH"
+    # Cloudinary configuration
+    cloudName: "drukumhal"
+    cloudApiKey: "517746727976313"
+    cloudApiSecretKey: "EZmCUOotMuHeSwTx79ro8vuzt3k"
+    # Razorpay configuration
+    keyId: "your_razorpay_key_id"
+    keySecret: "your_razorpay_key_secret"
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+# Frontend configuration
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: irfan8194/ecommerce-frontend
+    tag: v1.14
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: LoadBalancer
+    port: 80
+    targetPort: 80
+  
+  env:
+    # Backend API URL - update this with your backend service URL
+    viteApiPath: "http://localhost:31100"
+  
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Ingress configuration (optional)
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: ekomart.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+        - path: /api
+          pathType: Prefix
+          service: backend
+  tls: []
+    # - secretName: ekomart-tls
+    #   hosts:
+    #     - ekomart.example.com

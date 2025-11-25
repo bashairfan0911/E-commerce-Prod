@@ -1,0 +1,50 @@
+{{- if .Values.backend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ekomart.backend.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: backend
+      {{- include "ekomart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: backend
+        {{- include "ekomart.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: backend
+        image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+        imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.backend.service.targetPort }}
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: {{ .Values.backend.env.nodeEnv | quote }}
+        - name: PORT
+          value: {{ .Values.backend.env.port | quote }}
+        - name: DBURI
+          value: {{ .Values.backend.env.dbUri | quote }}
+        - name: JWT_SECRET_KEY
+          value: {{ .Values.backend.env.jwtSecretKey | quote }}
+        - name: CLOUD_NAME
+          value: {{ .Values.backend.env.cloudName | quote }}
+        - name: CLOUD_API_KEY
+          value: {{ .Values.backend.env.cloudApiKey | quote }}
+        - name: CLOUD_API_SECRET_KEY
+          value: {{ .Values.backend.env.cloudApiSecretKey | quote }}
+        - name: KEY_ID
+          value: {{ .Values.backend.env.keyId | quote }}
+        - name: KEY_SECRET
+          value: {{ .Values.backend.env.keySecret | quote }}
+        resources:
+          {{- toYaml .Values.backend.resources | nindent 10 }}
+{{- end }}
