@@ -1,0 +1,48 @@
+# ArgoCD RBAC ConfigMap
+# Apply with: kubectl apply -f argocd-rbac-cm.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+data:
+  # Default policy
+  policy.default: role:readonly
+  
+  # CSV format for RBAC policies
+  policy.csv: |
+    # Admin role - full access
+    p, role:admin, applications, *, */*, allow
+    p, role:admin, clusters, *, *, allow
+    p, role:admin, repositories, *, *, allow
+    p, role:admin, projects, *, *, allow
+    p, role:admin, accounts, *, *, allow
+    p, role:admin, certificates, *, *, allow
+    p, role:admin, gpgkeys, *, *, allow
+    
+    # Developer role - can sync and view applications
+    p, role:developer, applications, get, */*, allow
+    p, role:developer, applications, sync, */*, allow
+    p, role:developer, applications, override, */*, allow
+    p, role:developer, applications, action/*, */*, allow
+    p, role:developer, repositories, get, *, allow
+    p, role:developer, projects, get, *, allow
+    
+    # Read-only role - can only view
+    p, role:readonly, applications, get, */*, allow
+    p, role:readonly, repositories, get, *, allow
+    p, role:readonly, projects, get, *, allow
+    p, role:readonly, clusters, get, *, allow
+    
+    # EkoMart specific roles
+    p, role:ekomart-admin, applications, *, ekomart/*, allow
+    p, role:ekomart-developer, applications, get, ekomart/*, allow
+    p, role:ekomart-developer, applications, sync, ekomart/*, allow
+    
+    # Group mappings (if using SSO)
+    # g, your-github-org:team-admins, role:admin
+    # g, your-github-org:team-developers, role:developer
+    
+  # Scopes for OIDC/SSO
+  scopes: '[groups, email]'

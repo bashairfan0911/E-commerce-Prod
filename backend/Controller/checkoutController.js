@@ -24,7 +24,6 @@ export const createOrder = async (req, res) => {
   const { userId, items, totalAmount, shippingAddress, paymentMethod } = req.body
 
   try {
-    // Calculate estimated delivery (5-7 days from now)
     const estimatedDelivery = new Date();
     estimatedDelivery.setDate(estimatedDelivery.getDate() + 6);
 
@@ -48,24 +47,19 @@ export const createOrder = async (req, res) => {
     await newOrder.save()
     await user.save()
 
-    // Clear the user's cart after order is placed
     await cartModel.findOneAndUpdate(
       { user: userId },
       { $set: { products: [] } }
     );
-    console.log('Cart cleared for user:', userId);
 
-    res.status(200).json({ message: "Order created", order: newOrder })
+    return res.status(200).json({ message: "Order created", order: newOrder })
   } catch (error) {
-    console.error('Error creating order:', error);
-    res.status(500).json({ message: 'Error creating order' });
+    return res.status(500).json({ message: 'Error creating order' });
   }
-
 }
 
 export const showOrder = async (req, res) => {
   const { orderId } = req.params
-  console.log(orderId)
 
   try {
     const order = await orderModel.findOne({ _id: orderId }).populate('items.productId')
@@ -74,7 +68,6 @@ export const showOrder = async (req, res) => {
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    // Add default tracking history if missing (for old orders)
     if (!order.trackingHistory || order.trackingHistory.length === 0) {
       order.trackingHistory = [{
         status: order.orderStatus || 'pending',
@@ -84,7 +77,6 @@ export const showOrder = async (req, res) => {
       await order.save();
     }
 
-    // Add default estimated delivery if missing
     if (!order.estimatedDelivery) {
       const estimatedDelivery = new Date(order.createdAt);
       estimatedDelivery.setDate(estimatedDelivery.getDate() + 6);
@@ -92,16 +84,9 @@ export const showOrder = async (req, res) => {
       await order.save();
     }
 
-    // Log if any products are missing
-    const missingProducts = order.items.filter(item => !item.productId);
-    if (missingProducts.length > 0) {
-      console.warn(`⚠️  Order ${orderId} has ${missingProducts.length} missing products`);
-    }
-
-    res.status(200).json({ message: "order fetched successfully", order: order })
+    return res.status(200).json({ message: "order fetched successfully", order: order })
   } catch (error) {
-    console.error('Error fetching order:', error);
-    res.status(500).json({ message: 'Error in finding order' });
+    return res.status(500).json({ message: 'Error in finding order' });
   }
 }
 
@@ -124,32 +109,24 @@ export const updateOrderStatus = async (req, res) => {
     });
 
     await order.save();
-    res.status(200).json({ message: 'Order status updated', order });
+    return res.status(200).json({ message: 'Order status updated', order });
   } catch (error) {
-    console.error('Error updating order:', error);
-    res.status(500).json({ message: 'Error updating order status' });
+    return res.status(500).json({ message: 'Error updating order status' });
   }
 };
 
 export const cancelOrder = async (req, res) => {
   const { orderId } = req.params;
 
-  console.log('Cancel order request:', orderId);
-
   try {
     const order = await orderModel.findById(orderId);
 
     if (!order) {
-      console.log('Order not found:', orderId);
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    console.log('Current order status:', order.orderStatus);
-
-    // Only allow cancellation if order is not shipped or delivered
     const currentStatus = order.orderStatus || 'pending';
     if (['shipped', 'out_for_delivery', 'delivered', 'cancelled'].includes(currentStatus)) {
-      console.log('Cannot cancel order with status:', currentStatus);
       return res.status(400).json({
         message: `Cannot cancel order that is ${currentStatus}`
       });
@@ -157,7 +134,6 @@ export const cancelOrder = async (req, res) => {
 
     order.orderStatus = 'cancelled';
 
-    // Initialize trackingHistory if it doesn't exist
     if (!order.trackingHistory) {
       order.trackingHistory = [];
     }
@@ -169,18 +145,15 @@ export const cancelOrder = async (req, res) => {
     });
 
     await order.save();
-    console.log('Order cancelled successfully');
-    res.status(200).json({ message: 'Order cancelled successfully', order });
+    return res.status(200).json({ message: 'Order cancelled successfully', order });
   } catch (error) {
-    console.error('Error cancelling order:', error);
-    res.status(500).json({ message: 'Error cancelling order', error: error.message });
+    return res.status(500).json({ message: 'Error cancelling order', error: error.message });
   }
 };
 
 export const startPayment = async (req, res) => {
   const { amount, currency } = req.body;
 
-  // If Razorpay is configured, use real integration
   if (razorpayInstance) {
     const options = {
       amount: amount * 100,
@@ -196,8 +169,6 @@ export const startPayment = async (req, res) => {
     }
   }
 
-  // Mock Razorpay response for testing
-  console.log('🧪 Using mock Razorpay payment (test mode)');
   const mockOrder = {
     id: `order_mock_${Date.now()}`,
     entity: "order",
@@ -211,7 +182,7 @@ export const startPayment = async (req, res) => {
     created_at: Math.floor(Date.now() / 1000)
   };
 
-  res.status(200).json({
+  return res.status(200).json({
     message: "Mock order created successfully",
     order: mockOrder,
     isMock: true
@@ -219,7 +190,6 @@ export const startPayment = async (req, res) => {
 };
 
 
-// Get all orders for admin dashboard
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await orderModel.find()
@@ -227,14 +197,13 @@ export const getAllOrders = async (req, res) => {
       .populate('items.productId', 'title images')
       .sort({ createdAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "All orders fetched successfully",
       orders: orders,
       count: orders.length
     });
   } catch (error) {
-    console.error('Error fetching all orders:', error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error fetching orders",
       error: error.message
     });

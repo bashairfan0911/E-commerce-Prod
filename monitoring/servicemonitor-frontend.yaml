@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-metrics
+  namespace: ekomart
+  labels:
+    app: frontend
+    monitoring: "true"
+spec:
+  selector:
+    app: frontend
+  ports:
+    - name: metrics
+      port: 80
+      targetPort: 80
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: frontend-monitor
+  namespace: ekomart
+  labels:
+    app: frontend
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+      monitoring: "true"
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

@@ -5,7 +5,6 @@ export const addtoCart = async (req, res) => {
 
   try {
     const oldCart = await cartModel.findOne({ user: userId });
-    // console.log(oldCart)
 
     if (oldCart) {
       const productIndex = oldCart.products.findIndex(
@@ -18,36 +17,34 @@ export const addtoCart = async (req, res) => {
         oldCart.products.push({ product: productId, quantity });
       }
       await oldCart.save();
-      res.status(200).json({ message: "Cart updated" });
-    } else {
-      const newcart = new cartModel({
-        user: userId,
-        products: [{ product: productId, quantity }],
-      });
-      await newcart.save();
-      res.status(200).json({ message: "Added to cart successfully" });
+      return res.status(200).json({ message: "Cart updated" });
     }
+    
+    const newcart = new cartModel({
+      user: userId,
+      products: [{ product: productId, quantity }],
+    });
+    await newcart.save();
+    return res.status(200).json({ message: "Added to cart successfully" });
   } catch (error) {
-    // console.log(error);
-    res.status(500).json({ messgae: "Not added to cart" });
+    return res.status(500).json({ message: "Not added to cart" });
   }
 };
 
 export const showCart = async (req, res) => {
   const { userId } = req.body;
-  // console.log(userId)
+  
   try {
     const cart = await cartModel
       .findOne({ user: userId })
       .populate("products.product");
     if (cart) {
-      res.status(200).json({ message: "Cart items fetched", cart });
-    } else {
-      res.status(400).json({ message: "No items added in cart" });
+      return res.status(200).json({ message: "Cart items fetched", cart });
     }
+    
+    return res.status(400).json({ message: "No items added in cart" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: error });
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -61,14 +58,13 @@ export const updateCart = async (req, res) => {
       if (productIndex > -1) {
         oldCart.products[productIndex].quantity = quantity
       }
+      await oldCart.save()
+      return res.status(200).json({ message: 'Cart updated' })
     }
-    await oldCart.save()
-    res.status(200).json({ message: 'Cart updated' })
+    return res.status(404).json({ message: 'Cart not found' })
   } catch (error) {
-    res.status(500).json({ message: 'Cart not updated' })
-    console.log(error)
+    return res.status(500).json({ message: 'Cart not updated' })
   }
-
 }
 
 export const deleteCart = async (req, res) => {
@@ -87,8 +83,6 @@ export const deleteCart = async (req, res) => {
     }
     return res.status(404).json({ message: 'Cart not found' });
   } catch (error) {
-    res.status(500).json({ message: 'Unable to update cart' });
-    console.log(error)
+    return res.status(500).json({ message: 'Unable to update cart' });
   }
-
 }
